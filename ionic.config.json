@@ -1,0 +1,7 @@
+{
+  "name": "Calorieasy",
+  "integrations": {
+    "capacitor": {}
+  },
+  "type": "react-vite"
+}
