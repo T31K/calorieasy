@@ -3,6 +3,11 @@
 @tailwind utilities;
 
 
+#app {
+  --background: transparent;
+}
+
+
 .onTop {
   z-index: 999999;
 }

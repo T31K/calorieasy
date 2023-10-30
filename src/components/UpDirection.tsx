@@ -1,19 +1,17 @@
-import * as React from 'react';
+import { useState } from 'react';
 import { Range, Direction, getTrackBackground } from 'react-range';
-
 const STEP = 0.1;
 const MIN = 0;
-const MAX = 100;
+const MAX = 200;
 
 interface UpDirectionProps {
-  rtl: boolean;
-  color: string,
+  color: string;
   values: Array<any>; // Replace any with the correct type of values in the array
-  setValues: (values: Array<any>) => void; // Replace any with the correct type
 }
 
-const UpDirection: React.FC<UpDirectionProps> = ({ rtl, values, setValues, color }) => {
-  
+const UpDirection: React.FC<UpDirectionProps> = ({ values, color }) => {
+  const [val, setVal] = useState<number[]>(values);
+
   return (
     <div
       style={{
@@ -27,7 +25,7 @@ const UpDirection: React.FC<UpDirectionProps> = ({ rtl, values, setValues, color
         step={STEP}
         min={MIN}
         max={MAX}
-        onChange={(values) => setValues(values)}
+        onChange={(values) => setVal(values)}
         renderTrack={({ props, children }) => (
           <div
             onMouseDown={props.onMouseDown}
@@ -37,7 +35,7 @@ const UpDirection: React.FC<UpDirectionProps> = ({ rtl, values, setValues, color
               flexGrow: 1,
               width: '5px',
               display: 'flex',
-              height: '50px'
+              height: '50px',
             }}
           >
             <div
@@ -52,19 +50,15 @@ const UpDirection: React.FC<UpDirectionProps> = ({ rtl, values, setValues, color
                   min: MIN,
                   max: MAX,
                   direction: Direction.Up,
-                  rtl
+                  rtl: false,
                 }),
-                alignSelf: 'center'
+                alignSelf: 'center',
               }}
-            >
-            </div>
+            ></div>
           </div>
         )}
-        renderThumb={({ props, isDragged }) => (
-         <div></div>
-        )}
+        renderThumb={({ props, isDragged }) => <div></div>}
       />
-
     </div>
   );
 };
