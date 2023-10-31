@@ -19,8 +19,24 @@ const Logs = ({ dataStore }) => {
   }, []);
 
   useEffect(() => {
-    if (selectedMonth) fetchFromStore();
-  }, [selectedMonth]);
+    if (selectedMonth && dataStore) fetchFromStore();
+    // dataStore?.set(
+    //   'foods:2023-10',
+    //   JSON.stringify({
+    //     31: [
+    //       {
+    //         emoji: '🍳',
+    //         timestamp: '11:03AM',
+    //         name: 'Big breakfast',
+    //         calories: 850,
+    //         protein: 45,
+    //         carbs: 100,
+    //         fat: 20,
+    //       },
+    //     ],
+    //   })
+    // );
+  }, [selectedMonth, dataStore]);
 
   function handleIonChange(e) {
     const { value } = e.target;
@@ -35,6 +51,7 @@ const Logs = ({ dataStore }) => {
       const res = await dataStore.get(`foods:${selectedMonth}`);
       if (res) {
         const resItems = JSON.parse(res);
+        console.log(resItems);
         setItems(resItems);
       } else {
         setItems([]);

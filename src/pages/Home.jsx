@@ -3,45 +3,14 @@ import './Tab1.css';
 import { useState, useEffect } from 'react';
 import { CircularProgressbarWithChildren, buildStyles } from 'react-circular-progressbar';
 import 'react-circular-progressbar/dist/styles.css';
-import ExploreContainer from '../components/ExploreContainer';
+import { v4 as uuid } from 'uuid';
 
-const Tab1 = ({ dataStore }) => {
-  const [adminData, setAdminData] = useState({});
-
-  useEffect(() => {
-    fetchFromStore();
-
-    async function fetchFromStore() {
-      const admin = await dataStore?.get('admin');
-
-      if (admin) {
-        setAdminData(JSON.parse(admin));
-      } else {
-        let adminObj = {
-          name: '',
-          current_calories: 1500,
-          total_calories: 2500,
-          current_protein: 28,
-          total_protein: 150,
-          current_carbs: 50,
-          total_carbs: 200,
-          current_fat: 50,
-          total_fat: 90,
-          age: 24,
-          goal: 'lose',
-          premium: false,
-        };
-        dataStore?.set('admin', JSON.stringify(adminObj));
-        setAdminData(adminObj);
-      }
-    }
-  }, []);
-
+const Home = ({ dataStore, adminData, setAdminData }) => {
   return (
     <IonPage>
       <div className="container h-[90vh] pt-12 pb-6 flex flex-col justify-around gap-4">
         <div>
-          <h1 className="text-left text-xl pl-5">Welcome back, {adminData.name ? adminData.name : 'User'}!</h1>
+          <h1 className="text-left text-xl pl-5">Welcome back, {adminData?.name}!</h1>
         </div>
 
         <div className="flex justify-center ">
@@ -123,4 +92,4 @@ const Tab1 = ({ dataStore }) => {
   );
 };
 
-export default Tab1;
+export default Home;

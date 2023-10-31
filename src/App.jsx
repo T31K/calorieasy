@@ -38,8 +38,11 @@ setupIonicReact({
 });
 
 const App = () => {
-  const [dataStore, setDataStore] = useState(null);
+  const [dataStore, setDataStore] = useState(null); // DB
+
+  const [adminData, setAdminData] = useState({});
   const [isCameraActive, setIsCameraActive] = useState(false);
+
   useEffect(() => {
     initStore();
     async function initStore() {
@@ -48,6 +51,35 @@ const App = () => {
       setDataStore(store);
     }
   }, []);
+
+  useEffect(() => {
+    if (dataStore) fetchFromStore();
+    async function fetchFromStore() {
+      const admin = await dataStore?.get('admin');
+
+      if (admin) {
+        setAdminData(JSON.parse(admin));
+      } else {
+        let adminObj = {
+          id: uuid(),
+          name: 'Tim',
+          current_calories: 1500,
+          total_calories: 2500,
+          current_protein: 28,
+          total_protein: 150,
+          current_carbs: 50,
+          total_carbs: 200,
+          current_fat: 50,
+          total_fat: 90,
+          age: 24,
+          goal: 'lose',
+          premium: false,
+        };
+        dataStore?.set('admin', JSON.stringify(adminObj));
+        setAdminData(adminObj);
+      }
+    }
+  }, [dataStore]);
 
   function handleCameraClick(e) {
     e.stopPropagation();
@@ -63,7 +95,11 @@ const App = () => {
               exact
               path="/"
             >
-              <Home dataStore={dataStore} />
+              <Home
+                dataStore={dataStore}
+                adminData={adminData}
+                setAdminData={setAdminData}
+              />
             </Route>
             <Route
               exact
@@ -79,6 +115,8 @@ const App = () => {
               path="/camera"
             >
               <Camera
+                dataStore={dataStore}
+                adminData={adminData}
                 isCameraActive={isCameraActive}
                 setIsCameraActive={setIsCameraActive}
               />
