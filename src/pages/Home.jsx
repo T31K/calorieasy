@@ -5,7 +5,7 @@ import { CircularProgressbarWithChildren, buildStyles } from 'react-circular-pro
 import 'react-circular-progressbar/dist/styles.css';
 import { v4 as uuid } from 'uuid';
 
-const Home = ({ dataStore, adminData, setAdminData }) => {
+const Home = ({ adminData }) => {
   return (
     <IonPage>
       <div className="container h-[90vh] pt-12 pb-6 flex flex-col justify-around gap-4">

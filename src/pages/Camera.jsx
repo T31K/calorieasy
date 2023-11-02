@@ -6,10 +6,14 @@ import { CameraPreview } from '@capacitor-community/camera-preview';
 import { useLocation } from 'react-router';
 import { cameraOutline, closeCircleOutline, refreshOutline, checkmarkOutline } from 'ionicons/icons';
 import Checkmark from '../components/icons/Checkmark';
+import { today, currentTime } from '../utils/dateUtils';
+import { v4 as uuid } from 'uuid';
 
 const Camera = ({ isCameraActive, setIsCameraActive, adminData, dataStore }) => {
-  const [isStreamOn, setIsStreamOn] = useState(false);
-  const [imageData, setImageData] = useState('');
+  const [isStreamOn, setIsStreamOn] = useState(!false);
+  const [imageData, setImageData] = useState(
+    'http://res.cloudinary.com/dvz9avi1t/image/upload/v1698911368/ycmy5yc10tieynkgcsbq.jpg'
+  );
   const [isCheckShown, setIsCheckShown] = useState(false);
   const location = useLocation();
 
@@ -29,8 +33,27 @@ const Camera = ({ isCameraActive, setIsCameraActive, adminData, dataStore }) => 
     e?.preventDefault();
     try {
       CameraPreview?.stop();
-      const result = await sendImgToServer();
-      // todo: log the food here, add pusher js
+      // const result = await sendImgToServer();
+      const resLogs = await dataStore?.get(`${today()}`);
+      let oldLogs;
+      if (resLogs) oldLogs = JSON.parse(resLogs);
+      else oldLogs = [];
+      console.log(currentTime());
+      oldLogs.push({
+        id: uuid(),
+        loading: true,
+        emoji: '',
+        timestamp: currentTime(),
+        name: '',
+        calories: 0,
+        protein: 0,
+        carbs: 0,
+        fat: 0,
+      });
+      await dataStore?.set(`foods:${today()}`, JSON.stringify(oldLogs));
+      window.location.href = '/';
+
+      return;
       if (result.error) {
         console.error('Upload failed:', result.error);
       } else {
@@ -106,8 +129,8 @@ const Camera = ({ isCameraActive, setIsCameraActive, adminData, dataStore }) => 
         <>
           <img
             style={{ zIndex: '99999' }}
-            className="w-screen h-screen"
             src={imageData}
+            className="h-screen"
             alt=""
           />
           <div

@@ -1,4 +1,7 @@
-import { Redirect, Route } from 'react-router-dom';
+import { Route } from 'react-router-dom';
+import { useEffect, useState } from 'react';
+import { v4 as uuid } from 'uuid';
+
 import {
   IonApp,
   IonIcon,
@@ -9,14 +12,14 @@ import {
   IonTabs,
   setupIonicReact,
 } from '@ionic/react';
+import { Storage } from '@ionic/storage';
 import { IonReactRouter } from '@ionic/react-router';
 import { add, homeOutline, listOutline } from 'ionicons/icons';
+
 import Home from './pages/Home';
-import Tab2 from './pages/Tab2';
 import Logs from './pages/Logs';
 import Camera from './pages/Camera';
 
-import { Storage } from '@ionic/storage';
 import '@ionic/react/css/core.css';
 import '@ionic/react/css/normalize.css';
 import '@ionic/react/css/structure.css';
@@ -30,7 +33,6 @@ import '@ionic/react/css/display.css';
 
 import './theme/variables.css';
 import './theme/global.css';
-import { useEffect, useState } from 'react';
 
 setupIonicReact({
   rippleEffect: false,
@@ -48,6 +50,7 @@ const App = () => {
     async function initStore() {
       const store = new Storage();
       await store.create();
+
       setDataStore(store);
     }
   }, []);
@@ -56,7 +59,6 @@ const App = () => {
     if (dataStore) fetchFromStore();
     async function fetchFromStore() {
       const admin = await dataStore?.get('admin');
-
       if (admin) {
         setAdminData(JSON.parse(admin));
       } else {
@@ -78,6 +80,30 @@ const App = () => {
         dataStore?.set('admin', JSON.stringify(adminObj));
         setAdminData(adminObj);
       }
+      // let obj = JSON.stringify([
+      //   {
+      //     loading: false,
+      //     emoji: '🍳',
+      //     timestamp: '11:03AM',
+      //     name: 'Big breakfast',
+      //     calories: 850,
+      //     protein: 45,
+      //     carbs: 100,
+      //     fat: 20,
+      //   },
+      //   {
+      //     loading: false,
+      //     emoji: '🍳',
+      //     timestamp: '11:03AM',
+      //     name: 'Big breakfast',
+      //     calories: 850,
+      //     protein: 45,
+      //     carbs: 100,
+      //     fat: 20,
+      //   },
+      // ]);
+      // dataStore.set('foods:2023-10-21', obj);
+      // dataStore.set('foods:2023-11-02', obj);
     }
   }, [dataStore]);
 
@@ -101,12 +127,7 @@ const App = () => {
                 setAdminData={setAdminData}
               />
             </Route>
-            <Route
-              exact
-              path="/tab2"
-            >
-              <Tab2 />
-            </Route>
+
             <Route path="/logs">
               <Logs dataStore={dataStore} />
             </Route>
