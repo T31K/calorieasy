@@ -1,0 +1,17 @@
+/* New container */
+.swiper-container {
+  position: relative;
+  width: 100%;
+  padding: 0 40px; /* Adjust padding for arrow positioning */
+}
+
+/* Fix the buttons positions */
+.swiper-button-prev {
+  opacity: 0 !important;
+  left: 0; /* Position the previous button on the left */
+}
+
+.swiper-button-next {
+  opacity: 0 !important;
+  right: 0; /* Position the next button on the right */
+}

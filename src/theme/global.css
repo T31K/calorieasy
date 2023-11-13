@@ -7,6 +7,9 @@
   --background: transparent;
 }
 
+div.item-native {
+  padding: 0 !important;
+}
 
 .onTop {
   z-index: 999999;

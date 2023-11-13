@@ -1,24 +1,17 @@
 import { Route } from 'react-router-dom';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { v4 as uuid } from 'uuid';
+import pusher from './utils/pusherConfigs';
 
-import {
-  IonApp,
-  IonIcon,
-  IonLabel,
-  IonRouterOutlet,
-  IonTabBar,
-  IonTabButton,
-  IonTabs,
-  setupIonicReact,
-} from '@ionic/react';
+import { IonApp, IonIcon, IonRouterOutlet, IonTabBar, IonTabButton, IonTabs, setupIonicReact } from '@ionic/react';
 import { Storage } from '@ionic/storage';
+import { today } from './utils/dateUtils';
 import { IonReactRouter } from '@ionic/react-router';
 import { add, homeOutline, listOutline } from 'ionicons/icons';
-
 import Home from './pages/Home';
 import Logs from './pages/Logs';
 import Camera from './pages/Camera';
+import Onboard from './pages/Onboard';
 
 import '@ionic/react/css/core.css';
 import '@ionic/react/css/normalize.css';
@@ -36,21 +29,19 @@ import './theme/global.css';
 
 setupIonicReact({
   rippleEffect: false,
-  mode: 'md',
 });
 
 const App = () => {
   const [dataStore, setDataStore] = useState(null); // DB
-
   const [adminData, setAdminData] = useState({});
+  const [shouldSave, setShouldSave] = useState(false);
   const [isCameraActive, setIsCameraActive] = useState(false);
-
   useEffect(() => {
     initStore();
     async function initStore() {
       const store = new Storage();
       await store.create();
-
+      // store.clear();
       setDataStore(store);
     }
   }, []);
@@ -63,23 +54,30 @@ const App = () => {
         setAdminData(JSON.parse(admin));
       } else {
         let adminObj = {
+          onboard: false,
           id: uuid(),
           name: 'Tim',
-          current_calories: 1500,
+          system: 'metric', // metric || imperial
+          age: '',
+          weight: '', // 70 || 150
+          height: '', // 180 if metric || 4ft 5in if imperial
+          gender: '', // male || female || other
+          activity: '', // sedentary, light, moderate, heavy, athlete
+          goal: '', // gain || maintain // lose
+          current_calories: 0, // remove
           total_calories: 2500,
-          current_protein: 28,
+          current_protein: 0,
           total_protein: 150,
-          current_carbs: 50,
+          current_carbs: 0,
           total_carbs: 200,
-          current_fat: 50,
+          current_fat: 0,
           total_fat: 90,
-          age: 24,
-          goal: 'lose',
           premium: false,
         };
         dataStore?.set('admin', JSON.stringify(adminObj));
         setAdminData(adminObj);
       }
+
       // let obj = JSON.stringify([
       //   {
       //     loading: false,
@@ -107,8 +105,72 @@ const App = () => {
     }
   }, [dataStore]);
 
+  useEffect(() => {
+    if (adminData) {
+      const channel = pusher.subscribe('calorieasyMainChannel');
+      channel.bind(`${adminData.id}`, async (data) => {
+        const { food_id, food_data } = data;
+        const foodRes = await dataStore?.get(`foods:${today()}`);
+        let foodArray = JSON.parse(foodRes) || [];
+
+        const updatedFoodArray = foodArray.map((obj) => {
+          if (obj.id === food_id) {
+            // Return a new object with the updated data
+            return { ...obj, ...food_data };
+          }
+          return obj; // Return the original object if there's no match
+        });
+
+        await dataStore?.set(`foods:${today()}`, JSON.stringify(updatedFoodArray));
+        updateFoods(updatedFoodArray);
+      });
+
+      return () => {
+        channel.unbind(`${adminData.id}`);
+        pusher.unsubscribe('calorieasyMainChannel');
+      };
+    }
+  }, [adminData, dataStore, today]);
+
+  function fireOnboard() {
+    const modalBtn = document.getElementById('presentAlert');
+    console.log(modalBtn);
+    if (modalBtn) modalBtn.click();
+  }
+  function updateFoods(updatedArr) {
+    let currentCalories = 0;
+    let currentProtein = 0;
+    let currentFat = 0;
+    let currentCarbs = 0;
+
+    updatedArr?.forEach((obj) => {
+      currentCalories += obj.calories;
+      currentProtein += obj.protein;
+      currentCarbs += obj.carbs;
+      currentFat += obj.fat;
+    });
+
+    setAdminData((prevAdminData) => ({
+      ...prevAdminData,
+      current_calories: currentCalories,
+      current_protein: currentProtein,
+      current_carbs: currentCarbs,
+      current_fat: currentFat,
+    }));
+    setShouldSave(true);
+  }
+
+  useEffect(() => {
+    if (adminData && shouldSave) updateAdminData();
+
+    async function updateAdminData() {
+      await dataStore?.set('admin', JSON.stringify(adminData));
+      setShouldSave(false);
+    }
+  }, [adminData, shouldSave]);
+
   function handleCameraClick(e) {
-    e.stopPropagation();
+    e?.stopPropagation();
     setIsCameraActive(true);
   }
 
@@ -121,13 +183,32 @@ const App = () => {
               exact
               path="/"
             >
-              <Home
+              {adminData ? (
+                adminData.onboard ? (
+                  <Home
+                    dataStore={dataStore}
+                    adminData={adminData}
+                    setAdminData={setAdminData}
+                  />
+                ) : (
+                  <Onboard
+                    dataStore={dataStore}
+                    adminData={adminData}
+                    setAdminData={setAdminData}
+                  />
+                )
+              ) : null}
+            </Route>
+            <Route
+              exact
+              path="/onboard"
+            >
+              <Onboard
                 dataStore={dataStore}
                 adminData={adminData}
                 setAdminData={setAdminData}
               />
             </Route>
-
             <Route path="/logs">
               <Logs dataStore={dataStore} />
             </Route>
@@ -146,11 +227,11 @@ const App = () => {
           <IonTabBar
             slot="bottom"
             color={isCameraActive ? '' : 'light '}
-            className={isCameraActive ? 'hidden' : 'pt-2 pb-4 '}
+            className={isCameraActive || !adminData?.onboard ? 'hidden' : 'pt-2 pb-4 '}
           >
             <IonTabButton
               tab="home"
-              className={isCameraActive ? 'hidden' : 'visible'}
+              className={isCameraActive || !adminData?.onboard ? 'invisible' : 'visible'}
               href="/"
             >
               <IonIcon
@@ -164,7 +245,7 @@ const App = () => {
             ></IonTabButton>
             <IonTabButton
               tab="logs"
-              className={isCameraActive ? 'invisible' : 'visible'}
+              className={isCameraActive || !adminData?.onboard ? 'invisible' : 'visible'}
               href="/logs"
             >
               <IonIcon
@@ -175,7 +256,7 @@ const App = () => {
           </IonTabBar>
         </IonTabs>
       </IonReactRouter>
-      {!isCameraActive && (
+      {!isCameraActive && adminData?.onboard ? (
         <a
           href="/camera"
           className="absolute bottom-[12px] w-[70px] text-3xl h-[70px] flex items-center justify-center bg-[#58F168] onTop rounded-full left-[50%] mb-5 transform -translate-x-1/2"
@@ -186,6 +267,8 @@ const App = () => {
             icon={add}
           />
         </a>
+      ) : (
+        <></>
       )}
     </IonApp>
   );

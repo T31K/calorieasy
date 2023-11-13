@@ -18,4 +18,24 @@ function currentTime() {
   return strHours + ':' + strMinutes + ' ' + ampm;
 }
 
-export { today, currentTime };
+function convertTime12to24(time12h) {
+  const [time, modifier] = time12h.split(/(AM|PM)/);
+  let [hours, minutes] = time.split(':');
+  if (hours === '12') {
+    hours = '00';
+  }
+  if (modifier === 'PM') {
+    hours = parseInt(hours, 10) + 12;
+  }
+  return `${hours}:${minutes}`;
+}
+
+function sortItemsByTimestampDesc(items) {
+  return items.sort((a, b) => {
+    const timeA = convertTime12to24(a.timestamp);
+    const timeB = convertTime12to24(b.timestamp);
+    return timeB.localeCompare(timeA); // For descending order
+  });
+}
+
+export { today, currentTime, convertTime12to24, sortItemsByTimestampDesc };

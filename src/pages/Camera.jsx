@@ -10,11 +10,10 @@ import { today, currentTime } from '../utils/dateUtils';
 import { v4 as uuid } from 'uuid';
 
 const Camera = ({ isCameraActive, setIsCameraActive, adminData, dataStore }) => {
-  const [isStreamOn, setIsStreamOn] = useState(!false);
-  const [imageData, setImageData] = useState(
-    'http://res.cloudinary.com/dvz9avi1t/image/upload/v1698911368/ycmy5yc10tieynkgcsbq.jpg'
-  );
+  const [isStreamOn, setIsStreamOn] = useState(false);
+  const [imageData, setImageData] = useState('');
   const [isCheckShown, setIsCheckShown] = useState(false);
+  const [isUploading, setIsUploading] = useState(false); // New state to track upload status
   const location = useLocation();
 
   useEffect(() => {
@@ -29,18 +28,22 @@ const Camera = ({ isCameraActive, setIsCameraActive, adminData, dataStore }) => 
   }, [isCameraActive, adminData]);
 
   async function handleUpload(e) {
+    if (isUploading) return; // Prevent further clicks if already uploading
+
     e?.stopPropagation();
     e?.preventDefault();
+    setIsUploading(true); // Start upload process
     try {
       CameraPreview?.stop();
-      // const result = await sendImgToServer();
-      const resLogs = await dataStore?.get(`${today()}`);
+
+      const resLogs = await dataStore?.get(`foods:${today()}`);
       let oldLogs;
       if (resLogs) oldLogs = JSON.parse(resLogs);
       else oldLogs = [];
-      console.log(currentTime());
+
+      const id = uuid();
       oldLogs.push({
-        id: uuid(),
+        id: id,
         loading: true,
         emoji: '',
         timestamp: currentTime(),
@@ -51,11 +54,11 @@ const Camera = ({ isCameraActive, setIsCameraActive, adminData, dataStore }) => 
         fat: 0,
       });
       await dataStore?.set(`foods:${today()}`, JSON.stringify(oldLogs));
-      window.location.href = '/';
+      const result = await sendImgToServer({ food_id: id });
 
-      return;
       if (result.error) {
         console.error('Upload failed:', result.error);
+        setIsUploading(false); // Reset upload status
       } else {
         setIsCheckShown(true);
         setTimeout(() => {
@@ -64,6 +67,7 @@ const Camera = ({ isCameraActive, setIsCameraActive, adminData, dataStore }) => 
       }
     } catch (error) {
       console.error('An unexpected error occurred:', error);
+      setIsUploading(false); // Reset upload status on error
     }
   }
 
@@ -77,15 +81,15 @@ const Camera = ({ isCameraActive, setIsCameraActive, adminData, dataStore }) => 
     setIsStreamOn(true);
   }
 
-  async function sendImgToServer() {
+  async function sendImgToServer({ food_id }) {
     const cloudName = 'dvz9avi1t';
     const uploadPreset = 'bpv1mjw5';
 
     if (!imageData) {
       return { error: 'No image data provided' };
     }
-    const { id } = adminData;
-    const metadata = String(`id=${id}`);
+    const admin_id = adminData.id;
+    const metadata = String(`food_id=${food_id}|admin_id=${admin_id}`);
     try {
       const response = await axios.post(`https://api.cloudinary.com/v1_1/${cloudName}/upload`, {
         file: imageData,
@@ -139,12 +143,15 @@ const Camera = ({ isCameraActive, setIsCameraActive, adminData, dataStore }) => 
           >
             <a
               onClick={async (e) => {
+                if (isUploading) return;
                 e.stopPropagation();
                 e.preventDefault();
                 setImageData('');
                 await turnOnCamera();
               }}
-              className="w-[70px] text-3xl h-[70px] flex items-center justify-center bg-[#F17C7C] rounded-full"
+              className={`w-[70px] text-3xl h-[70px] flex items-center justify-center  ${
+                isUploading ? 'bg-gray-400' : 'bg-[#F17C7C]'
+              } rounded-full`}
             >
               <IonIcon
                 aria-hidden="true"
@@ -153,7 +160,9 @@ const Camera = ({ isCameraActive, setIsCameraActive, adminData, dataStore }) => 
             </a>
             <a
               onClick={async (e) => handleUpload(e)}
-              className="w-[70px] text-3xl h-[70px] flex items-center justify-center bg-[#58F168] rounded-full"
+              className={`w-[70px] text-3xl h-[70px] flex items-center justify-center ${
+                isUploading ? 'bg-gray-400' : 'bg-[#58F168]'
+              } rounded-full`}
             >
               <IonIcon
                 aria-hidden="true"

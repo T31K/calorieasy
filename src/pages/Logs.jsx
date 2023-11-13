@@ -1,7 +1,19 @@
 import { useEffect, useState } from 'react';
-import { IonContent, IonDatetime, IonPage, IonChip, IonSpinner } from '@ionic/react';
+import {
+  IonContent,
+  IonDatetime,
+  IonPage,
+  IonLabel,
+  IonChip,
+  IonSpinner,
+  IonItem,
+  IonItemSliding,
+  IonItemOption,
+  IonItemOptions,
+} from '@ionic/react';
 import UpDirection from '../components/UpDirection';
-import { today } from '../utils/dateUtils';
+import { today, convertTime12to24, sortItemsByTimestampDesc } from '../utils/dateUtils';
+
 const Logs = ({ dataStore }) => {
   const [items, setItems] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -27,7 +39,8 @@ const Logs = ({ dataStore }) => {
     try {
       const res = await dataStore.get(`foods:${selectedDate}`);
       if (res) {
-        const resItems = JSON.parse(res);
+        let resItems = JSON.parse(res);
+        resItems = sortItemsByTimestampDesc(resItems);
         setItems(resItems);
       } else {
         setItems([]);
@@ -68,7 +81,7 @@ const Logs = ({ dataStore }) => {
                     <div className="flex flex-col items-start justify-end">
                       <div className="text-lg font-semibold">{item.name}</div>
                       <div className="text-gray-600 mt-[-5px]">
-                        {item.calories ? `${item.calories} kcal` : 'Calculating...'}
+                        {item.calories ? `${item.calories} kcal` : `'Calculating...'`}
                       </div>
                     </div>
                   </div>
@@ -116,16 +129,19 @@ const Logs = ({ dataStore }) => {
                       >
                         {item.loading ? '100g' : `${item.fat}g`}
                       </div>{' '}
-                      <div className="mt-[-5px] text-gray-700">Fat</div>
+                      <div className=" text-gray-700">Fat</div>
                     </div>
                   </div>
                 </div>
               </div>
             ))}
-            {!items && !isLoading && (
+
+            {items?.length == 0 && !isLoading ? (
               <div className="border border-stone-200 rounded-2xl flex flex-col items-start justify-between w-full p-4 mb-3">
                 No food logged
               </div>
+            ) : (
+              <></>
             )}
           </div>
         </IonContent>
