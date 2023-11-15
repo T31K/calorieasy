@@ -29,6 +29,7 @@ import './theme/global.css';
 
 setupIonicReact({
   rippleEffect: false,
+  platform: 'ios',
 });
 
 const App = () => {
