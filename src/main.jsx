@@ -2,7 +2,7 @@ import React from 'react';
 import { createRoot } from 'react-dom/client';
 import App from './App';
 import { ClerkProvider } from '@clerk/clerk-react';
-const clerkPubKey = process.env.CLERK_PUBLISHABLE_KEY || import.meta.env.VITE_CLERK_PUBLISHABLE_KEY;
+const clerkPubKey = process.env.CLERK_PUBLISHABLE_KEY;
 
 const container = document.getElementById('root');
 const root = createRoot(container);
