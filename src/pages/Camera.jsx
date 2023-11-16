@@ -9,7 +9,7 @@ import Checkmark from '../components/icons/Checkmark';
 import { today, currentTime } from '../utils/dateUtils';
 import { v4 as uuid } from 'uuid';
 
-const Camera = ({ isCameraActive, setIsCameraActive, adminData, dataStore }) => {
+const Camera = ({ isCameraActive, setIsCameraActive, userData, dataStore }) => {
   const [isStreamOn, setIsStreamOn] = useState(false);
   const [imageData, setImageData] = useState('');
   const [isCheckShown, setIsCheckShown] = useState(false);
@@ -22,10 +22,10 @@ const Camera = ({ isCameraActive, setIsCameraActive, adminData, dataStore }) => 
   }, [location]);
 
   useEffect(() => {
-    if (isCameraActive && adminData && Object.keys(adminData).length > 0) {
+    if (isCameraActive && userData && Object.keys(userData).length > 0) {
       turnOnCamera();
     }
-  }, [isCameraActive, adminData]);
+  }, [isCameraActive, userData]);
 
   async function handleUpload(e) {
     if (isUploading) return; // Prevent further clicks if already uploading
@@ -88,7 +88,7 @@ const Camera = ({ isCameraActive, setIsCameraActive, adminData, dataStore }) => 
     if (!imageData) {
       return { error: 'No image data provided' };
     }
-    const admin_id = adminData.id;
+    const admin_id = userData.id;
     const metadata = String(`food_id=${food_id}|admin_id=${admin_id}`);
     try {
       const response = await axios.post(`https://api.cloudinary.com/v1_1/${cloudName}/upload`, {
