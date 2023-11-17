@@ -1,5 +1,4 @@
-import { useEffect, useState } from 'react';
-// Import Swiper React components
+import { useState } from 'react';
 import { Swiper, SwiperSlide } from 'swiper/react';
 import {
   IonIcon,
@@ -20,7 +19,6 @@ import 'swiper/css/pagination';
 import 'swiper/css/effect-fade';
 import 'swiper/css/navigation';
 import './onboard.css';
-// import required modules
 import { EffectFade, Navigation } from 'swiper/modules';
 import { heightList } from '../utils/heightList';
 import Icon from '../assets/icon.png';
@@ -30,7 +28,7 @@ import axios from 'axios';
 
 const SERVER_UPDATE_URL = import.meta.env.VITE_SERVER_UPDATE_USER;
 
-export default function Onboard({ userData, setUserData, dataStore }) {
+export default function Onboard({ userData, setUserData }) {
   const [activeSlide, setActiveSlide] = useState(0);
   const [totalCalories, setTotalCalories] = useState(null);
 
@@ -46,13 +44,16 @@ export default function Onboard({ userData, setUserData, dataStore }) {
 
   async function handleNextBtnClick() {
     if (activeSlide == 6) {
-      const res = calculateTdee(userData);
-      setTotalCalories(res);
+      const { tdee, protein, carbs, fat } = calculateTdee(userData);
+      setTotalCalories(tdee);
       handleNext();
     } else if (activeSlide == 7) {
       updateUser({
         ...userData,
         total_calories: `${totalCalories}`,
+        total_protein: protein,
+        total_carbs: carbs,
+        total_fat: fat,
         onboard: true,
       });
     } else {

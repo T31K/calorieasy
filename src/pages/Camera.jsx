@@ -40,17 +40,23 @@ const Camera = ({ setIsCameraActive, userData }) => {
     }
 
     const admin_id = userData.id;
-    const metadata = String(`admin_id=${admin_id}`);
+
     try {
       const res = await axios.post(`${cloudinaryUrl}`, {
         file: imageSrc,
         upload_preset: cloudinaryPreset,
-        context: metadata,
       });
+      // todo CHANGE THIS PLZ
+      // for dev
+      // const res = {
+      //   status: 200,
+      //   data: { url: 'https://res.cloudinary.com/dvz9avi1t/image/upload/v1700225681/nexqoghneaab4xl14tni.jpg' },
+      // };
+
       if (res.status === 200) {
         const { url } = res.data;
-        const magicRes = await axios.post(`${serverUpload}`, { url });
-        console.log(magicRes.data);
+        const magicRes = await axios.post(`${serverUpload}`, { url, admin_id });
+        console.log(magicRes);
       }
 
       setIsLoading(false);

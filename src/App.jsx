@@ -1,14 +1,23 @@
 import { Route } from 'react-router-dom';
-import { useEffect, useState, useRef } from 'react';
-import pusher from './utils/pusherConfigs';
+import { useEffect, useState } from 'react';
 import axios from 'axios';
 
-import { IonApp, IonIcon, IonRouterOutlet, IonTabBar, IonTabButton, IonTabs, setupIonicReact } from '@ionic/react';
-import { today } from './utils/dateUtils';
+import {
+  IonApp,
+  IonIcon,
+  IonRouterOutlet,
+  IonTabBar,
+  IonTabButton,
+  IonTabs,
+  setupIonicReact,
+  IonButton,
+  IonAlert,
+} from '@ionic/react';
 import { IonReactRouter } from '@ionic/react-router';
 import { add, homeOutline, listOutline, personOutline, statsChartOutline } from 'ionicons/icons';
 import Home from './pages/Home';
 import Logs from './pages/Logs';
+import Show from './pages/Show';
 import Camera from './pages/Camera';
 import Onboard from './pages/Onboard';
 import Profile from './pages/Profile';
@@ -28,7 +37,6 @@ import '@ionic/react/css/display.css';
 import './theme/variables.css';
 import './theme/global.css';
 import { useAuth0 } from '@auth0/auth0-react';
-
 setupIonicReact({
   rippleEffect: false,
   platform: 'ios',
@@ -62,37 +70,11 @@ const App = () => {
         current_fat,
         current_carbs,
       });
+      setFoodData(foodsByDate);
     } catch (error) {
       console.error('Error fetching user data:', error);
     }
   };
-
-  useEffect(() => {
-    if (userData) {
-      const channel = pusher.subscribe('calorieasyMainChannel');
-      channel.bind(`${userData.id}`, async (data) => {
-        const { food_id, food_data } = data;
-        const foodRes = await dataStore?.get(`foods:${today()}`);
-        let foodArray = JSON.parse(foodRes) || [];
-
-        const updatedFoodArray = foodArray.map((obj) => {
-          if (obj.id === food_id) {
-            // Return a new object with the updated data
-            return { ...obj, ...food_data };
-          }
-          return obj; // Return the original object if there's no match
-        });
-
-        await dataStore?.set(`foods:${today()}`, JSON.stringify(updatedFoodArray));
-        updateFoods(updatedFoodArray);
-      });
-
-      return () => {
-        channel.unbind(`${userData.id}`);
-        pusher.unsubscribe('calorieasyMainChannel');
-      };
-    }
-  }, [userData, dataStore, today]);
 
   async function updateFoods(foodsObj) {
     const today = new Date().toISOString().split('T')[0];
@@ -114,8 +96,18 @@ const App = () => {
   }
 
   function handleCameraClick(e) {
+    const button = document.getElementById('present-alert');
+    button?.click();
     e?.stopPropagation();
-    setIsCameraActive(true);
+  }
+
+  function handleUpgradeClick(param) {
+    if (param == 'continue') {
+      setIsCameraActive(true);
+      window.location.href = '/camera';
+    } else {
+      window.location.href = '/profile';
+    }
   }
 
   return (
@@ -156,7 +148,16 @@ const App = () => {
                   />
                 </Route>
                 <Route path="/logs">
-                  <Logs dataStore={dataStore} />
+                  <Logs
+                    userData={userData}
+                    foodData={foodData}
+                  />
+                </Route>
+                <Route path="/show">
+                  <Show
+                    userData={userData}
+                    foodData={foodData}
+                  />
                 </Route>
                 <Route
                   exact
@@ -230,8 +231,7 @@ const App = () => {
             </IonTabs>
           </IonReactRouter>
           {!isCameraActive && userData?.onboard ? (
-            <a
-              href="/camera"
+            <div
               className="absolute bottom-[12px] w-[70px] text-3xl h-[70px] flex items-center justify-center bg-[#58F168] onTop rounded-full left-[50%] mb-5 transform -translate-x-1/2"
               onClick={(e) => handleCameraClick(e)}
             >
@@ -239,10 +239,32 @@ const App = () => {
                 aria-hidden="true"
                 icon={add}
               />
-            </a>
+            </div>
           ) : (
             <></>
           )}
+          <IonButton
+            id="present-alert"
+            className="invisible"
+          >
+            Click Me
+          </IonButton>
+          <IonAlert
+            trigger="present-alert"
+            header="Upgrade to premium!"
+            subHeader={`${userData?.remaining_api_calls}/3 tokens left!`}
+            message="Premium users have unlimited tokens!"
+            buttons={[
+              {
+                text: 'Continue',
+                handler: () => handleUpgradeClick('continue'),
+              },
+              {
+                text: 'Upgrade!',
+                handler: () => handleUpgradeClick('upgrade'), // Use the custom handler here
+              },
+            ]}
+          ></IonAlert>
         </IonApp>
       ) : (
         <Login />
