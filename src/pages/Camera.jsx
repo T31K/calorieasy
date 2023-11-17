@@ -1,211 +1,143 @@
-import './camera.css';
-import axios from 'axios';
-import { useEffect, useState } from 'react';
-import { IonIcon, IonPage } from '@ionic/react';
-import { CameraPreview } from '@capacitor-community/camera-preview';
-import { useLocation } from 'react-router';
+import { IonPage, IonIcon } from '@ionic/react';
+import { useRef, useCallback, useState, useEffect } from 'react';
+import Webcam from 'react-webcam';
 import { cameraOutline, closeCircleOutline, refreshOutline, checkmarkOutline } from 'ionicons/icons';
-import Checkmark from '../components/icons/Checkmark';
-import { today, currentTime } from '../utils/dateUtils';
-import { v4 as uuid } from 'uuid';
+import { useLocation } from 'react-router';
+import './loader.css';
 
-const Camera = ({ isCameraActive, setIsCameraActive, userData, dataStore }) => {
-  const [isStreamOn, setIsStreamOn] = useState(false);
-  const [imageData, setImageData] = useState('');
-  const [isCheckShown, setIsCheckShown] = useState(false);
-  const [isUploading, setIsUploading] = useState(false); // New state to track upload status
+const cloudinaryUrl = import.meta.env.VITE_CLOUD_URL;
+const cloudinaryPreset = import.meta.env.VITE_CLOUD_PRESET;
+const serverUpload = import.meta.env.VITE_SERVER_UPLOAD;
+
+const videoConstraints = {
+  width: 600,
+  height: 600,
+  facingMode: 'rear',
+};
+import axios from 'axios';
+
+const Camera = ({ setIsCameraActive, userData }) => {
   const location = useLocation();
+  const webcamRef = useRef(null);
+  const [imageSrc, setImageSrc] = useState(null);
+  const [isLoading, setIsLoading] = useState(false);
+
+  const capture = useCallback(() => {
+    const imageSrc = webcamRef.current.getScreenshot();
+    setImageSrc(imageSrc); // Save the captured image to state
+  }, [webcamRef]);
 
   useEffect(() => {
     if (location?.pathname == '/camera') setIsCameraActive(true);
     else setIsCameraActive(false);
   }, [location]);
 
-  useEffect(() => {
-    if (isCameraActive && userData && Object.keys(userData).length > 0) {
-      turnOnCamera();
-    }
-  }, [isCameraActive, userData]);
-
-  async function handleUpload(e) {
-    if (isUploading) return; // Prevent further clicks if already uploading
-
-    e?.stopPropagation();
-    e?.preventDefault();
-    setIsUploading(true); // Start upload process
-    try {
-      CameraPreview?.stop();
-
-      const resLogs = await dataStore?.get(`foods:${today()}`);
-      let oldLogs;
-      if (resLogs) oldLogs = JSON.parse(resLogs);
-      else oldLogs = [];
-
-      const id = uuid();
-      oldLogs.push({
-        id: id,
-        loading: true,
-        emoji: '',
-        timestamp: currentTime(),
-        name: '',
-        calories: 0,
-        protein: 0,
-        carbs: 0,
-        fat: 0,
-      });
-      await dataStore?.set(`foods:${today()}`, JSON.stringify(oldLogs));
-      const result = await sendImgToServer({ food_id: id });
-
-      if (result.error) {
-        console.error('Upload failed:', result.error);
-        setIsUploading(false); // Reset upload status
-      } else {
-        setIsCheckShown(true);
-        setTimeout(() => {
-          window.location.href = '/';
-        }, 1000);
-      }
-    } catch (error) {
-      console.error('An unexpected error occurred:', error);
-      setIsUploading(false); // Reset upload status on error
-    }
-  }
-
-  async function turnOnCamera() {
-    console.log('turning on camera');
-    await CameraPreview?.start({
-      parent: 'content',
-      toBack: true,
-      position: 'rear',
-    });
-    setIsStreamOn(true);
-  }
-
-  async function sendImgToServer({ food_id }) {
-    const cloudName = 'dvz9avi1t';
-    const uploadPreset = 'bpv1mjw5';
-
-    if (!imageData) {
+  async function sendImgToServer() {
+    if (isLoading) return;
+    setIsLoading(true);
+    if (!imageSrc || !userData) {
       return { error: 'No image data provided' };
     }
+
     const admin_id = userData.id;
-    const metadata = String(`food_id=${food_id}|admin_id=${admin_id}`);
+    const metadata = String(`admin_id=${admin_id}`);
     try {
-      const response = await axios.post(`https://api.cloudinary.com/v1_1/${cloudName}/upload`, {
-        file: imageData,
-        upload_preset: uploadPreset,
+      const res = await axios.post(`${cloudinaryUrl}`, {
+        file: imageSrc,
+        upload_preset: cloudinaryPreset,
         context: metadata,
       });
-      return { data: response.data };
+      if (res.status === 200) {
+        const { url } = res.data;
+        const magicRes = await axios.post(`${serverUpload}`, { url });
+        console.log(magicRes.data);
+      }
+
+      setIsLoading(false);
     } catch (error) {
       console.error('Image upload failed:', error);
-      return { error: error.response ? error.response.data : error.message };
+      return { error: error.response ? error.res.data : error.message };
     }
   }
 
   return (
-    <IonPage className="cameraPage">
-      {!imageData && isStreamOn ? (
-        <a
-          onClick={async (e) => {
-            e.stopPropagation();
-            e.preventDefault();
-            const cameraSampleOptions = {
-              quality: 50,
-            };
-
-            const result = await CameraPreview.captureSample(cameraSampleOptions);
-            setImageData(`data:image/jpeg;base64,${result.value}`);
-            setIsStreamOn(false);
-            await CameraPreview.stop();
-          }}
-          className="absolute bottom-[105px] w-[70px] text-3xl h-[70px] flex items-center justify-center bg-[#58F168] active:bg-green-600  onTop rounded-full left-[50%] mb-5 transform -translate-x-1/2"
-        >
-          <IonIcon
-            aria-hidden="true"
-            icon={cameraOutline}
-          />
-        </a>
-      ) : (
-        <></>
-      )}
-      {imageData && (
-        <>
-          <img
-            style={{ zIndex: '99999' }}
-            src={imageData}
-            className="h-screen"
-            alt=""
-          />
-          <div
-            className={`absolute w-[90%] flex gap-4 items-center bottom-[50px] justify-center h-[200px] p-6 transform -translate-x-1/2 left-1/2`}
-            style={{ zIndex: '99999' }}
-          >
-            <a
-              onClick={async (e) => {
-                if (isUploading) return;
-                e.stopPropagation();
-                e.preventDefault();
-                setImageData('');
-                await turnOnCamera();
-              }}
-              className={`w-[70px] text-3xl h-[70px] flex items-center justify-center  ${
-                isUploading ? 'bg-gray-400' : 'bg-[#F17C7C]'
-              } rounded-full`}
-            >
-              <IonIcon
-                aria-hidden="true"
-                icon={refreshOutline}
-              />
-            </a>
-            <a
-              onClick={async (e) => handleUpload(e)}
-              className={`w-[70px] text-3xl h-[70px] flex items-center justify-center ${
-                isUploading ? 'bg-gray-400' : 'bg-[#58F168]'
-              } rounded-full`}
-            >
-              <IonIcon
-                aria-hidden="true"
-                icon={checkmarkOutline}
-              />
-            </a>
-          </div>
-        </>
+    <IonPage>
+      <div className=" container h-[90vh] pt-12 pb-6 px-10  bg-[#EAF0E0] flex flex-col justify-around gap-4">
+        {!imageSrc ? (
+          <>
+            <Webcam
+              audio={false}
+              height={videoConstraints.height} // Use height from videoConstraints
+              ref={webcamRef}
+              screenshotFormat="image/jpeg"
+              className="rounded-3xl"
+              width={videoConstraints.width} // Use width from videoConstraints
+              videoConstraints={videoConstraints}
+            />
+            <div className="flex justify-center">
+              <button
+                onClick={capture}
+                className="bg-gray-100 w-[60px] h-[60px] flex items-center justify-center rounded-full mx-auto"
+              >
+                <IonIcon
+                  aria-hidden="true"
+                  className="text-3xl"
+                  icon={cameraOutline}
+                />
+              </button>
+            </div>
+          </>
+        ) : (
+          <>
+            <img
+              src={imageSrc}
+              className="rounded-3xl"
+              alt="Captured"
+            />
+            <div className="flex justify-center">
+              <button
+                onClick={() => setImageSrc(null)}
+                className="bg-gray-100 w-[60px] h-[60px] flex items-center justify-center rounded-full mx-auto"
+              >
+                <IonIcon
+                  aria-hidden="true"
+                  className="text-3xl"
+                  icon={refreshOutline}
+                />
+              </button>
+              <button
+                onClick={sendImgToServer}
+                className="bg-gray-100 w-[60px] h-[60px] flex items-center justify-center rounded-full mx-auto"
+                disabled={isLoading} // Disable the button when loading
+              >
+                <IonIcon
+                  aria-hidden="true"
+                  className="text-3xl"
+                  icon={checkmarkOutline}
+                />
+              </button>
+            </div>
+          </>
+        )}
+      </div>
+      {isLoading && (
+        <div className="absolute h-[90vh] w-full bg-[#222222] opacity-50 flex pt-[70%] justify-center">
+          <span className="loader"></span>
+        </div>
       )}
       <a
         onClick={async (e) => {
           e.stopPropagation();
           e.preventDefault();
           window.location.href = '/';
-          await CameraPreview?.stop();
         }}
-        style={{ zIndex: '99999' }}
       >
         <IonIcon
           aria-hidden="true"
           icon={closeCircleOutline}
           className="absolute top-[45px] right-5 text-4xl"
-          style={{ zIndex: '99999' }}
         />
       </a>
-      <div
-        style={{ zIndex: '99999' }}
-        className={`absolute w-[90%] flex items-center justify-center h-[400px] border border-stone-300 rounded-3xl p-6 transform -translate-x-1/2 -translate-y-1/2 top-1/2 left-1/2 `}
-      >
-        {!isStreamOn && !imageData ? (
-          <div style={{ zIndex: '99999' }}>
-            <div className="lds-ring ">
-              <div></div>
-              <div></div>
-              <div></div>
-              <div></div>
-            </div>
-          </div>
-        ) : (
-          <></>
-        )}
-        {isCheckShown && <Checkmark />}
-      </div>
     </IonPage>
   );
 };

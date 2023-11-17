@@ -2,8 +2,10 @@ import { IonPage } from '@ionic/react';
 import './Tab1.css';
 import { CircularProgressbarWithChildren, buildStyles } from 'react-circular-progressbar';
 import 'react-circular-progressbar/dist/styles.css';
+import { useAuth0 } from '@auth0/auth0-react';
 
 const Home = ({ userData }) => {
+  const { user } = useAuth0();
   const countPathColor = () => {
     if (!userData?.total_calories) return; // Handle division by zero or undefined
 
@@ -24,7 +26,7 @@ const Home = ({ userData }) => {
     <IonPage>
       <div className="container h-[90vh] pt-12 pb-6 flex flex-col justify-around gap-4">
         <div className="flex gap-2 pl-5">
-          <h1 className="text-left text-xl font-semibold">Welcome back, {userData?.name}! 👋</h1>
+          <h1 className="text-left text-xl font-semibold">Welcome back, {user?.name}! 👋</h1>
         </div>
         <div className="flex justify-center ">
           <CircularProgressbarWithChildren

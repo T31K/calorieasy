@@ -45,14 +45,14 @@ const App = () => {
 
   useEffect(() => {
     if (isAuthenticated && user) {
-      console.log(isAuthenticated);
-      console.log(user);
+      fetchUserData(user.sub);
     }
   }, [isAuthenticated]);
 
   const fetchUserData = async (userId) => {
     try {
       const res = await axios.get(`${SERVER_INIT_URL}`, { params: { id: userId } });
+      console.log(res);
       const { user, foodsByDate } = res.data;
       const { current_calories, current_protein, current_fat, current_carbs } = await updateFoods(foodsByDate);
       setUserData({

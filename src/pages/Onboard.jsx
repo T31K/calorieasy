@@ -14,7 +14,6 @@ import {
 } from '@ionic/react';
 import { CircularProgressbarWithChildren, buildStyles } from 'react-circular-progressbar';
 import 'react-circular-progressbar/dist/styles.css';
-
 // Import Swiper styles
 import 'swiper/css';
 import 'swiper/css/pagination';
@@ -88,7 +87,7 @@ export default function Onboard({ userData, setUserData, dataStore }) {
         onSlideChange={(e) => setActiveSlide(e?.activeIndex)}
       >
         <SwiperSlide className="flex flex-col items-center justify-center pb-20">
-          <h1 className="text-4xl font-bold tracking-tight mt-[150px] mb-8 text-stone-900">Welcome to Calorieasy!</h1>
+          <h1 className="text-4xl font-bold tracking-tight mt-[150px] mb-8 text-stone-900">Welcome!</h1>
           <img
             src={Icon}
             alt=""
@@ -318,7 +317,7 @@ export default function Onboard({ userData, setUserData, dataStore }) {
           </div>
         </SwiperSlide>
       </Swiper>
-      <div className={`h-[10%] flex px-12 items-center justify-between ${!userData?.onboard && 'hidden'}`}>
+      <div className={`h-[10%] flex px-12 items-center justify-between`}>
         <div
           onClick={handlePrev}
           className={`bg-gray-300 w-[120px]  text-center active:bg-gray-400 text-gray-800 font-bold py-2 px-4 rounded-lg ${
