@@ -1,10 +1,7 @@
-import { useUser } from '@clerk/clerk-react';
 import { IonPage } from '@ionic/react';
 import { IonBadge, IonItem, IonLabel } from '@ionic/react';
 
 const Profile = ({ userData }) => {
-  const { user } = useUser();
-
   return (
     <IonPage>
       <div className="container h-[90vh] pt-12 pb-6 flex flex-col justify-start gap-4">

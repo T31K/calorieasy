@@ -2,7 +2,6 @@ import { IonPage } from '@ionic/react';
 import './Tab1.css';
 import { CircularProgressbarWithChildren, buildStyles } from 'react-circular-progressbar';
 import 'react-circular-progressbar/dist/styles.css';
-import { UserButton } from '@clerk/clerk-react';
 
 const Home = ({ userData }) => {
   const countPathColor = () => {
@@ -25,7 +24,6 @@ const Home = ({ userData }) => {
     <IonPage>
       <div className="container h-[90vh] pt-12 pb-6 flex flex-col justify-around gap-4">
         <div className="flex gap-2 pl-5">
-          <UserButton />
           <h1 className="text-left text-xl font-semibold">Welcome back, {userData?.name}! 👋</h1>
         </div>
         <div className="flex justify-center ">

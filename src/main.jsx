@@ -1,15 +1,22 @@
 import React from 'react';
 import { createRoot } from 'react-dom/client';
 import App from './App';
-import { ClerkProvider } from '@clerk/clerk-react';
-const clerkPubKey = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY;
-
+import { Auth0Provider } from '@auth0/auth0-react';
 const container = document.getElementById('root');
 const root = createRoot(container);
+const CLIENT_ID = import.meta.env.VITE_AUTH_CLIENT_ID;
+
 root.render(
   <React.StrictMode>
-    <ClerkProvider publishableKey={clerkPubKey}>
+    <Auth0Provider
+      domain="t31k.au.auth0.com"
+      clientId="huWKp9TKazubuZoAxivLZSavXRgjic3V"
+      cacheLocation="localstorage"
+      authorizationParams={{
+        redirect_uri: window.location.origin,
+      }}
+    >
       <App />
-    </ClerkProvider>
+    </Auth0Provider>
   </React.StrictMode>
 );

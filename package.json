@@ -12,6 +12,7 @@
     "lint": "eslint"
   },
   "dependencies": {
+    "@auth0/auth0-react": "^2.2.3",
     "@capacitor-community/camera-preview": "^5.0.0",
     "@capacitor/app": "5.0.6",
     "@capacitor/camera": "^5.0.7",

@@ -2,6 +2,7 @@ import { Route } from 'react-router-dom';
 import { useEffect, useState, useRef } from 'react';
 import pusher from './utils/pusherConfigs';
 import axios from 'axios';
+
 import { IonApp, IonIcon, IonRouterOutlet, IonTabBar, IonTabButton, IonTabs, setupIonicReact } from '@ionic/react';
 import { today } from './utils/dateUtils';
 import { IonReactRouter } from '@ionic/react-router';
@@ -11,8 +12,7 @@ import Logs from './pages/Logs';
 import Camera from './pages/Camera';
 import Onboard from './pages/Onboard';
 import Profile from './pages/Profile';
-
-import { useAuth, SignedIn, SignedOut, RedirectToSignIn } from '@clerk/clerk-react';
+import Login from './pages/Login';
 
 import '@ionic/react/css/core.css';
 import '@ionic/react/css/normalize.css';
@@ -27,6 +27,7 @@ import '@ionic/react/css/display.css';
 
 import './theme/variables.css';
 import './theme/global.css';
+import { useAuth0 } from '@auth0/auth0-react';
 
 setupIonicReact({
   rippleEffect: false,
@@ -40,28 +41,31 @@ const App = () => {
   const [foodData, setFoodData] = useState({});
   const [shouldSave, setShouldSave] = useState(false);
   const [isCameraActive, setIsCameraActive] = useState(false);
-  const { isLoaded, userId } = useAuth();
-
-  const fetchUserData = async (userId) => {
-    // try {
-    //   const res = await axios.get(`${SERVER_INIT_URL}`, { params: { id: userId } });
-    //   const { user, foodsByDate } = res.data;
-    //   const { current_calories, current_protein, current_fat, current_carbs } = await updateFoods(foodsByDate);
-    //   setUserData({
-    //     ...user,
-    //     current_calories,
-    //     current_protein,
-    //     current_fat,
-    //     current_carbs,
-    //   });
-    // } catch (error) {
-    //   console.error('Error fetching user data:', error);
-    // }
-  };
+  const { isAuthenticated, user } = useAuth0();
 
   useEffect(() => {
-    if (isLoaded) fetchUserData(userId);
-  }, [isLoaded]);
+    if (isAuthenticated && user) {
+      console.log(isAuthenticated);
+      console.log(user);
+    }
+  }, [isAuthenticated]);
+
+  const fetchUserData = async (userId) => {
+    try {
+      const res = await axios.get(`${SERVER_INIT_URL}`, { params: { id: userId } });
+      const { user, foodsByDate } = res.data;
+      const { current_calories, current_protein, current_fat, current_carbs } = await updateFoods(foodsByDate);
+      setUserData({
+        ...user,
+        current_calories,
+        current_protein,
+        current_fat,
+        current_carbs,
+      });
+    } catch (error) {
+      console.error('Error fetching user data:', error);
+    }
+  };
 
   useEffect(() => {
     if (userData) {
@@ -116,7 +120,7 @@ const App = () => {
 
   return (
     <>
-      <SignedIn>
+      {isAuthenticated ? (
         <IonApp>
           <IonReactRouter>
             <IonTabs>
@@ -240,10 +244,9 @@ const App = () => {
             <></>
           )}
         </IonApp>
-      </SignedIn>
-      <SignedOut>
-        <RedirectToSignIn />
-      </SignedOut>
+      ) : (
+        <Login />
+      )}
     </>
   );
 };
