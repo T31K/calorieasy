@@ -43,21 +43,20 @@ const App = () => {
   const { isLoaded, userId } = useAuth();
 
   const fetchUserData = async (userId) => {
-    try {
-      const res = await axios.get(`${SERVER_INIT_URL}`, { params: { id: userId } });
-      const { user, foodsByDate } = res.data;
-      const { current_calories, current_protein, current_fat, current_carbs } = await updateFoods(foodsByDate);
-
-      setUserData({
-        ...user,
-        current_calories,
-        current_protein,
-        current_fat,
-        current_carbs,
-      });
-    } catch (error) {
-      console.error('Error fetching user data:', error);
-    }
+    // try {
+    //   const res = await axios.get(`${SERVER_INIT_URL}`, { params: { id: userId } });
+    //   const { user, foodsByDate } = res.data;
+    //   const { current_calories, current_protein, current_fat, current_carbs } = await updateFoods(foodsByDate);
+    //   setUserData({
+    //     ...user,
+    //     current_calories,
+    //     current_protein,
+    //     current_fat,
+    //     current_carbs,
+    //   });
+    // } catch (error) {
+    //   console.error('Error fetching user data:', error);
+    // }
   };
 
   useEffect(() => {
