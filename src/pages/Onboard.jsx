@@ -26,7 +26,7 @@ import { calculateTdee } from '../utils/tdeeCalc';
 import { addCircleOutline, removeCircleOutline } from 'ionicons/icons';
 import axios from 'axios';
 
-const SERVER_UPDATE_URL = import.meta.env.VITE_SERVER_UPDATE_USER;
+const serverUpdateUrl = import.meta.env.VITE_SERVER_UPDATE_USER;
 
 export default function Onboard({ userData, setUserData }) {
   const [activeSlide, setActiveSlide] = useState(0);
@@ -63,14 +63,11 @@ export default function Onboard({ userData, setUserData }) {
   }
 
   async function updateUser(userObj) {
-    console.log(userObj);
     try {
-      const res = await axios.post(`${SERVER_UPDATE_URL}`, userObj);
+      const res = await axios.post(`${serverUpdateUrl}`, userObj);
       if (res.status === 200) window.location.href = '/';
     } catch (error) {
       console.error('Error updating user:', error);
-      // Handle error as needed
-      throw error;
     }
   }
 

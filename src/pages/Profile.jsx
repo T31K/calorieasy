@@ -99,7 +99,7 @@ const Profile = ({ userData }) => {
           </div>
           <div className="h-[50px] bg-stone-50 dark:bg-stone-800 rounded-xl border dark:border-stone-600 flex items-center gap-8 my-2 px-5">
             <div className="tracking-tight w-[20%]">TDE</div>
-            <div className="tracking-tight font-semibold w-[150px]">{userData?.total_calories}</div>
+            <div className="tracking-tight font-semibold w-[150px]">{userData?.total_calories} cals</div>
           </div>
           <div className="h-[50px] bg-stone-50 dark:bg-stone-800 rounded-xl border dark:border-stone-600 flex items-center gap-8 my-2 px-5">
             <div className="tracking-tight w-[20%]">Weight</div>

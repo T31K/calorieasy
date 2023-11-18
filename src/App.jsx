@@ -142,11 +142,6 @@ const App = () => {
     <>
       {isAuthenticated ? (
         <IonApp>
-          <IonHeader>
-            <IonToolbar>
-              <IonTitle></IonTitle>
-            </IonToolbar>
-          </IonHeader>
           <IonReactRouter>
             <IonTabs>
               <IonRouterOutlet>
