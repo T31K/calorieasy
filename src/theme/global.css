@@ -96,3 +96,7 @@ div.item-native {
 .button {
   animation: rainbowCycle 10s infinite linear;
 }
+
+.select-text {
+  color: #222 !important;
+}

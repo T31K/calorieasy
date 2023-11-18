@@ -40,7 +40,7 @@ const Profile = ({ userData }) => {
         <div className="flex gap-2 justify-center">
           <img
             src={user.picture}
-            className="rounded-full w-[180px] border-[10px] border-green-500 mt-6"
+            className="rounded-full w-[180px] border-[10px] border-green-500 dark:border-green-700 mt-6"
           />
           <div className="absolute right-5 top-20 bg-stone-500 text-white rounded-full p-2 text-center flex items-center justify-center">
             <IonIcon
@@ -70,46 +70,46 @@ const Profile = ({ userData }) => {
             },
           ]}
         ></IonAlert>
-        <div className="">
-          <div className="h-[80px] bg-stone-50 rounded-xl border flex justify-between items-center gap-8 my-2 px-5 pr-8 mt-6">
-            <div className="tracking-tight w-[75px]">Premium</div>
+        <div className="px-3">
+          <div className="h-[80px] bg-stone-50 dark:bg-stone-800 rounded-xl border dark:border-stone-600 flex justify-between items-center gap-8 my-2 px-5 pr-3 mt-6">
+            <div className="tracking-tight w-[20%]">Premium</div>
             <div className="tracking-tight font-semibold w-[150px] flex items-center gap-4">
               <IonBadge color={userData?.premium ? 'success' : 'danger'}>
                 {userData?.premium ? 'True' : 'False'}
               </IonBadge>
             </div>
             <button
-              className="rainbow w-[120px]  text-center active:bg-gray-400  font-bold py-2 px-4 rounded-lg"
+              className="rainbow w-[120px] rounded-full  text-center active:bg-gray-400  font-bold py-2 px-4"
               onClick={handleCheckout}
             >
               Upgrade!
             </button>
           </div>
-          <div className="h-[50px] bg-stone-50 rounded-xl border flex items-center gap-8 my-2 px-5">
-            <div className="tracking-tight w-[75px]">Name</div>
+          <div className="h-[50px] bg-stone-50 dark:bg-stone-800 rounded-xl border dark:border-stone-600 flex items-center gap-8 my-2 px-5">
+            <div className="tracking-tight w-[20%]">Name</div>
             <div className="tracking-tight font-semibold w-[150px]">{user.name}</div>
           </div>
-          <div className="h-[50px] bg-stone-50 rounded-xl border flex items-center gap-8 my-2 px-5">
-            <div className="tracking-tight w-[75px]">Age</div>
+          <div className="h-[50px] bg-stone-50 dark:bg-stone-800 rounded-xl border dark:border-stone-600 flex items-center gap-8 my-2 px-5">
+            <div className="tracking-tight w-[20%]">Age</div>
             <div className="tracking-tight font-semibold w-[150px]">{userData?.age}</div>
           </div>
-          <div className="h-[50px] bg-stone-50 rounded-xl border flex items-center gap-8 my-2 px-5">
-            <div className="tracking-tight w-[75px]">Goal</div>
-            <div className="tracking-tight font-semibold w-[150px]">{userData?.goal}</div>
+          <div className="h-[50px] bg-stone-50 dark:bg-stone-800 rounded-xl border dark:border-stone-600 flex items-center gap-8 my-2 px-5">
+            <div className="tracking-tight w-[20%]">Goal</div>
+            <div className="tracking-tight font-semibold w-[150px] capitalize">{userData?.goal} weight</div>
           </div>
-          <div className="h-[50px] bg-stone-50 rounded-xl border flex items-center gap-8 my-2 px-5">
-            <div className="tracking-tight w-[75px]">TDE</div>
+          <div className="h-[50px] bg-stone-50 dark:bg-stone-800 rounded-xl border dark:border-stone-600 flex items-center gap-8 my-2 px-5">
+            <div className="tracking-tight w-[20%]">TDE</div>
             <div className="tracking-tight font-semibold w-[150px]">{userData?.total_calories}</div>
           </div>
-          <div className="h-[50px] bg-stone-50 rounded-xl border flex items-center gap-8 my-2 px-5">
-            <div className="tracking-tight w-[75px]">Weight</div>
+          <div className="h-[50px] bg-stone-50 dark:bg-stone-800 rounded-xl border dark:border-stone-600 flex items-center gap-8 my-2 px-5">
+            <div className="tracking-tight w-[20%]">Weight</div>
             <div className="tracking-tight font-semibold w-[150px]">
               {userData?.weight}
               {userData?.system == 'metric' ? ' kg' : ' lbs'}
             </div>
           </div>
-          <div className="h-[50px] bg-stone-50 rounded-xl border flex items-center gap-8 my-2 px-5">
-            <div className="tracking-tight w-[75px]">Height</div>
+          <div className="h-[50px] bg-stone-50 dark:bg-stone-800 rounded-xl border dark:border-stone-600 flex items-center gap-8 my-2 px-5">
+            <div className="tracking-tight w-[20%]">Height</div>
             <div className="tracking-tight font-semibold w-[150px]">
               {userData?.height}
               {userData?.system == 'metric' ? ' cm' : ''}

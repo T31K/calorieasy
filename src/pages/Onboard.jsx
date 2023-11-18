@@ -43,17 +43,17 @@ export default function Onboard({ userData, setUserData }) {
   }
 
   async function handleNextBtnClick() {
+    const calculatedVal = calculateTdee(userData);
     if (activeSlide == 6) {
-      const { tdee, protein, carbs, fat } = calculateTdee(userData);
-      setTotalCalories(tdee);
+      setTotalCalories(calculatedVal.tdee);
       handleNext();
     } else if (activeSlide == 7) {
       updateUser({
         ...userData,
-        total_calories: `${totalCalories}`,
-        total_protein: protein,
-        total_carbs: carbs,
-        total_fat: fat,
+        total_calories: calculatedVal.tdee,
+        total_protein: calculatedVal.protein,
+        total_carbs: calculatedVal.carbs,
+        total_fat: calculatedVal.fat,
         onboard: true,
       });
     } else {
@@ -62,6 +62,7 @@ export default function Onboard({ userData, setUserData }) {
   }
 
   async function updateUser(userObj) {
+    console.log(userObj);
     try {
       const res = await axios.post(`${SERVER_UPDATE_URL}`, userObj);
       if (res.status === 200) window.location.href = '/';
@@ -117,6 +118,7 @@ export default function Onboard({ userData, setUserData }) {
         </SwiperSlide>
         <SwiperSlide className="flex flex-col items-center justify-center pb-20">
           <div className="font-semibold text-xl mb-5  text-gray-800">What is your weight?</div>
+
           <div className="w-[70%] !text-gray-800">
             <IonSegment
               onIonChange={(e) =>
@@ -161,6 +163,7 @@ export default function Onboard({ userData, setUserData }) {
                 })
               }
               value={userData?.system}
+              disabled
             >
               <IonSegmentButton value="metric">
                 <IonLabel>Metric</IonLabel>
@@ -174,8 +177,8 @@ export default function Onboard({ userData, setUserData }) {
             <div className="flex items-center !text-gray-800">
               <IonInput
                 type="number"
-                className="w-[50px]"
-                placeholder="000"
+                className="w-[50px] !text-gray-900"
+                placeholder="182"
                 onIonChange={(e) =>
                   setUserData({
                     ...userData,
@@ -189,6 +192,7 @@ export default function Onboard({ userData, setUserData }) {
             <div>
               <IonSelect
                 placeholder={userData?.system == 'metric' ? '150' : `4ft 5in`}
+                className="!text-black"
                 onIonChange={(e) =>
                   setUserData({
                     ...userData,

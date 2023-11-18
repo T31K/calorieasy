@@ -11,7 +11,6 @@ function calculateTdee(obj) {
     let [feet, inches] = obj.height.split('ft ');
     inches = inches.replace('in', '');
     height = parseInt(feet, 10) * 30.48 + parseInt(inches, 10) * 2.54; // Convert feet and inches to cm
-
     // Convert weight from pounds to kg
     weight = weight * 0.453592;
   }
@@ -52,7 +51,6 @@ function calculateTdee(obj) {
   const proteinGrams = caloriesFromProtein / 4;
   const fatGrams = caloriesFromFat / 9;
   const carbsGrams = caloriesFromCarbs / 4;
-
   return {
     tdee,
     protein: Math.round(proteinGrams),

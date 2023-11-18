@@ -6,7 +6,8 @@ function Login() {
   return (
     <section className="h-[100vh] py-24 bg-[#EAF0E0]">
       <div className="flex flex-col items-center justify-center pb-20">
-        <h1 className="text-4xl font-bold tracking-tight mt-[150px] mb-8 text-stone-900">Welcome!</h1>
+        <h1 className="text-4xl font-bold tracking-tight mt-[150px] mb-3 text-stone-900">Welcome!</h1>
+        <div className="font-semibold tracking-tight text-xl text-stone-700 mb-8">Start tracking calories!</div>
         <img
           src={Icon}
           alt=""
