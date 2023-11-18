@@ -1,6 +1,6 @@
 import { useAuth0 } from '@auth0/auth0-react';
 import { IonPage } from '@ionic/react';
-import { IonBadge, IonIcon, IonButton, IonAlert } from '@ionic/react';
+import { IonBadge, IonIcon, IonButton, IonAlert, IonContent } from '@ionic/react';
 import axios from 'axios';
 const serverCheckoutUrl = import.meta.env.VITE_SERVER_CHECKOUT_URL;
 import { logOutOutline } from 'ionicons/icons';
@@ -85,36 +85,38 @@ const Profile = ({ userData }) => {
               Upgrade!
             </button>
           </div>
-          <div className="h-[50px] bg-stone-50 dark:bg-stone-800 rounded-xl border dark:border-stone-600 flex items-center gap-8 my-2 px-5">
-            <div className="tracking-tight w-[20%]">Name</div>
-            <div className="tracking-tight font-semibold w-[150px]">{user.name}</div>
-          </div>
-          <div className="h-[50px] bg-stone-50 dark:bg-stone-800 rounded-xl border dark:border-stone-600 flex items-center gap-8 my-2 px-5">
-            <div className="tracking-tight w-[20%]">Age</div>
-            <div className="tracking-tight font-semibold w-[150px]">{userData?.age}</div>
-          </div>
-          <div className="h-[50px] bg-stone-50 dark:bg-stone-800 rounded-xl border dark:border-stone-600 flex items-center gap-8 my-2 px-5">
-            <div className="tracking-tight w-[20%]">Goal</div>
-            <div className="tracking-tight font-semibold w-[150px] capitalize">{userData?.goal} weight</div>
-          </div>
-          <div className="h-[50px] bg-stone-50 dark:bg-stone-800 rounded-xl border dark:border-stone-600 flex items-center gap-8 my-2 px-5">
-            <div className="tracking-tight w-[20%]">TDE</div>
-            <div className="tracking-tight font-semibold w-[150px]">{userData?.total_calories} cals</div>
-          </div>
-          <div className="h-[50px] bg-stone-50 dark:bg-stone-800 rounded-xl border dark:border-stone-600 flex items-center gap-8 my-2 px-5">
-            <div className="tracking-tight w-[20%]">Weight</div>
-            <div className="tracking-tight font-semibold w-[150px]">
-              {userData?.weight}
-              {userData?.system == 'metric' ? ' kg' : ' lbs'}
+          <IonContent>
+            <div className="h-[50px] bg-stone-50 dark:bg-stone-800 rounded-xl border dark:border-stone-600 flex items-center gap-8 my-2 px-5">
+              <div className="tracking-tight w-[20%]">Name</div>
+              <div className="tracking-tight font-semibold w-[150px]">{user.name}</div>
             </div>
-          </div>
-          <div className="h-[50px] bg-stone-50 dark:bg-stone-800 rounded-xl border dark:border-stone-600 flex items-center gap-8 my-2 px-5">
-            <div className="tracking-tight w-[20%]">Height</div>
-            <div className="tracking-tight font-semibold w-[150px]">
-              {userData?.height}
-              {userData?.system == 'metric' ? ' cm' : ''}
+            <div className="h-[50px] bg-stone-50 dark:bg-stone-800 rounded-xl border dark:border-stone-600 flex items-center gap-8 my-2 px-5">
+              <div className="tracking-tight w-[20%]">Age</div>
+              <div className="tracking-tight font-semibold w-[150px]">{userData?.age}</div>
             </div>
-          </div>
+            <div className="h-[50px] bg-stone-50 dark:bg-stone-800 rounded-xl border dark:border-stone-600 flex items-center gap-8 my-2 px-5">
+              <div className="tracking-tight w-[20%]">Goal</div>
+              <div className="tracking-tight font-semibold w-[150px] capitalize">{userData?.goal} weight</div>
+            </div>
+            <div className="h-[50px] bg-stone-50 dark:bg-stone-800 rounded-xl border dark:border-stone-600 flex items-center gap-8 my-2 px-5">
+              <div className="tracking-tight w-[20%]">TDE</div>
+              <div className="tracking-tight font-semibold w-[150px]">{userData?.total_calories} cals</div>
+            </div>
+            <div className="h-[50px] bg-stone-50 dark:bg-stone-800 rounded-xl border dark:border-stone-600 flex items-center gap-8 my-2 px-5">
+              <div className="tracking-tight w-[20%]">Weight</div>
+              <div className="tracking-tight font-semibold w-[150px]">
+                {userData?.weight}
+                {userData?.system == 'metric' ? ' kg' : ' lbs'}
+              </div>
+            </div>
+            <div className="h-[50px] bg-stone-50 dark:bg-stone-800 rounded-xl border dark:border-stone-600 flex items-center gap-8 my-2 px-5">
+              <div className="tracking-tight w-[20%]">Height</div>
+              <div className="tracking-tight font-semibold w-[150px]">
+                {userData?.height}
+                {userData?.system == 'metric' ? ' cm' : ''}
+              </div>
+            </div>
+          </IonContent>
         </div>
       </div>
     </IonPage>
