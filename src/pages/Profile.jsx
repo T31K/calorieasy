@@ -85,7 +85,9 @@ const Profile = ({ userData }) => {
               Upgrade!
             </button>
           </div>
-          <IonContent>
+        </div>
+        <IonContent>
+          <div className="px-3">
             <div className="h-[50px] bg-stone-50 dark:bg-stone-800 rounded-xl border dark:border-stone-600 flex items-center gap-8 my-2 px-5">
               <div className="tracking-tight w-[20%]">Name</div>
               <div className="tracking-tight font-semibold w-[150px]">{user.name}</div>
@@ -116,8 +118,8 @@ const Profile = ({ userData }) => {
                 {userData?.system == 'metric' ? ' cm' : ''}
               </div>
             </div>
-          </IonContent>
-        </div>
+          </div>
+        </IonContent>
       </div>
     </IonPage>
   );
