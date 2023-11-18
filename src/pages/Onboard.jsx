@@ -43,11 +43,12 @@ export default function Onboard({ userData, setUserData }) {
   }
 
   async function handleNextBtnClick() {
-    const calculatedVal = calculateTdee(userData);
     if (activeSlide == 6) {
-      setTotalCalories(calculatedVal.tdee);
+      let totals = calculateTdee(userData);
+      setTotalCalories(totals.tdee);
       handleNext();
     } else if (activeSlide == 7) {
+      let calculatedVal = calculateTdee(userData);
       updateUser({
         ...userData,
         total_calories: calculatedVal.tdee,
@@ -74,9 +75,10 @@ export default function Onboard({ userData, setUserData }) {
   }
 
   function disableNext() {
-    if (activeSlide == 0) return false;
-    const fields = ['age', 'age', 'weight', 'height', 'gender', 'activity', 'goal']; // adjust if more fields
-    return userData[fields[activeSlide]]?.length === 0 || userData[fields[activeSlide]] == '';
+    if (activeSlide === 0) return false;
+    const fields = ['age', 'age', 'weight', 'height', 'gender', 'activity', 'goal'];
+    const fieldValue = userData[fields[activeSlide]];
+    return fieldValue === 0 || fieldValue === '' || fieldValue?.length == 1;
   }
 
   return (
