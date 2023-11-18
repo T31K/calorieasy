@@ -1,4 +1,4 @@
-import { IonPage, IonIcon } from '@ionic/react';
+import { IonPage, IonIcon, useIonToast } from '@ionic/react';
 import { useRef, useCallback, useState, useEffect } from 'react';
 import Webcam from 'react-webcam';
 import { cameraOutline, closeCircleOutline, refreshOutline, checkmarkOutline } from 'ionicons/icons';
@@ -18,9 +18,19 @@ import axios from 'axios';
 
 const Camera = ({ setIsCameraActive, userData }) => {
   const location = useLocation();
+
   const webcamRef = useRef(null);
   const [imageSrc, setImageSrc] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [present] = useIonToast();
+
+  const presentToast = (input) => {
+    present({
+      message: input,
+      duration: 1500,
+      position: 'top',
+    });
+  };
 
   const capture = useCallback(() => {
     const imageSrc = webcamRef.current.getScreenshot();
@@ -34,6 +44,7 @@ const Camera = ({ setIsCameraActive, userData }) => {
 
   async function sendImgToServer() {
     if (isLoading) return;
+    if (userData?.remaining_api_call == 0) alert('nice try');
     setIsLoading(true);
     if (!imageSrc || !userData) {
       return { error: 'No image data provided' };
@@ -56,9 +67,13 @@ const Camera = ({ setIsCameraActive, userData }) => {
       if (res.status === 200) {
         const { url } = res.data;
         const magicRes = await axios.post(`${serverUpload}`, { url, admin_id });
-        console.log(magicRes);
-      }
 
+        if (magicRes.status == 200) {
+          window.location.href = '/';
+        } else if (magicRes.status === 204) {
+          presentToast("Our AI couldn't read your food. Please readjust your camera");
+        }
+      }
       setIsLoading(false);
     } catch (error) {
       console.error('Image upload failed:', error);
@@ -83,11 +98,11 @@ const Camera = ({ setIsCameraActive, userData }) => {
             <div className="flex justify-center">
               <button
                 onClick={capture}
-                className="bg-gray-100 w-[60px] h-[60px] flex items-center justify-center rounded-full mx-auto"
+                className="bg-gray-900 w-[60px] h-[60px] flex items-center justify-center rounded-full mx-auto"
               >
                 <IonIcon
                   aria-hidden="true"
-                  className="text-3xl"
+                  className="text-3xl text-white"
                   icon={cameraOutline}
                 />
               </button>
@@ -103,22 +118,22 @@ const Camera = ({ setIsCameraActive, userData }) => {
             <div className="flex justify-center">
               <button
                 onClick={() => setImageSrc(null)}
-                className="bg-gray-100 w-[60px] h-[60px] flex items-center justify-center rounded-full mx-auto"
+                className="bg-red-400 w-[60px] h-[60px] flex items-center justify-center rounded-full mx-auto"
               >
                 <IonIcon
                   aria-hidden="true"
-                  className="text-3xl"
+                  className="text-3xl text-white"
                   icon={refreshOutline}
                 />
               </button>
               <button
                 onClick={sendImgToServer}
-                className="bg-gray-100 w-[60px] h-[60px] flex items-center justify-center rounded-full mx-auto"
+                className="bg-green-400 w-[60px] h-[60px] flex items-center justify-center rounded-full mx-auto"
                 disabled={isLoading} // Disable the button when loading
               >
                 <IonIcon
                   aria-hidden="true"
-                  className="text-3xl"
+                  className="text-3xl text-white"
                   icon={checkmarkOutline}
                 />
               </button>

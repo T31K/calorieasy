@@ -72,7 +72,7 @@ const Camera = ({ isCameraActive, setIsCameraActive, userData, dataStore }) => {
   }
 
   async function turnOnCamera() {
-    console.log('turning on camera');
+    // console.log('turning on camera');
     await CameraPreview?.start({
       parent: 'content',
       toBack: true,

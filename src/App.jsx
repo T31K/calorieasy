@@ -12,6 +12,9 @@ import {
   setupIonicReact,
   IonButton,
   IonAlert,
+  IonHeader,
+  IonToolbar,
+  IonTitle,
 } from '@ionic/react';
 import { IonReactRouter } from '@ionic/react-router';
 import { add, homeOutline, listOutline, personOutline, statsChartOutline } from 'ionicons/icons';
@@ -21,6 +24,7 @@ import Show from './pages/Show';
 import Camera from './pages/Camera';
 import Onboard from './pages/Onboard';
 import Profile from './pages/Profile';
+import Analytics from './pages/Analytics';
 import Login from './pages/Login';
 
 import '@ionic/react/css/core.css';
@@ -41,13 +45,14 @@ setupIonicReact({
   rippleEffect: false,
   platform: 'ios',
 });
-const SERVER_INIT_URL = import.meta.env.VITE_SERVER_INIT;
+const serverInitUrl = import.meta.env.VITE_SERVER_INIT;
+const serverCheckoutUrl = import.meta.env.VITE_SERVER_CHECKOUT_URL;
 
 const App = () => {
   const [dataStore, setDataStore] = useState(null); // DB
   const [userData, setUserData] = useState({});
   const [foodData, setFoodData] = useState({});
-  const [shouldSave, setShouldSave] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   const [isCameraActive, setIsCameraActive] = useState(false);
   const { isAuthenticated, user } = useAuth0();
 
@@ -59,8 +64,7 @@ const App = () => {
 
   const fetchUserData = async (userId) => {
     try {
-      const res = await axios.get(`${SERVER_INIT_URL}`, { params: { id: userId } });
-      console.log(res);
+      const res = await axios.get(`${serverInitUrl}`, { params: { id: userId } });
       const { user, foodsByDate } = res.data;
       const { current_calories, current_protein, current_fat, current_carbs } = await updateFoods(foodsByDate);
       setUserData({
@@ -70,6 +74,7 @@ const App = () => {
         current_fat,
         current_carbs,
       });
+      setIsLoading(false);
       setFoodData(foodsByDate);
     } catch (error) {
       console.error('Error fetching user data:', error);
@@ -96,9 +101,14 @@ const App = () => {
   }
 
   function handleCameraClick(e) {
-    const button = document.getElementById('present-alert');
-    button?.click();
-    e?.stopPropagation();
+    if (userData?.premium) {
+      setIsCameraActive(true);
+      window.location.href = '/camera';
+    } else {
+      const button = document.getElementById('present-alert');
+      button?.click();
+      e?.stopPropagation();
+    }
   }
 
   function handleUpgradeClick(param) {
@@ -106,14 +116,37 @@ const App = () => {
       setIsCameraActive(true);
       window.location.href = '/camera';
     } else {
-      window.location.href = '/profile';
+      handleCheckout();
     }
   }
+
+  const handleCheckout = async () => {
+    setIsLoading(true);
+    try {
+      const res = await axios.post(`${serverCheckoutUrl}`, {
+        email: user?.email,
+      });
+      if (res.status === 200) {
+        setIsLoading(false);
+        window.location.href = res.data;
+      } else {
+        console.error('Unexpected res status:', res.status);
+      }
+    } catch (error) {
+      console.error('Error creating checkout session:', error);
+      // Handle errors here (e.g., show error message to the user)
+    }
+  };
 
   return (
     <>
       {isAuthenticated ? (
         <IonApp>
+          <IonHeader>
+            <IonToolbar>
+              <IonTitle></IonTitle>
+            </IonToolbar>
+          </IonHeader>
           <IonReactRouter>
             <IonTabs>
               <IonRouterOutlet>
@@ -121,7 +154,13 @@ const App = () => {
                   exact
                   path="/"
                 >
-                  {userData ? (
+                  {isLoading ? (
+                    // Loading state
+                    <div className="absolute h-[100vh] w-full bg-[#b9e0bb] opacity-[40%] flex items-center justify-center">
+                      <span className="loader"></span>
+                    </div>
+                  ) : userData ? (
+                    // Check if user is onboarded
                     userData.onboard ? (
                       <Home
                         dataStore={dataStore}
@@ -135,7 +174,10 @@ const App = () => {
                         setUserData={setUserData}
                       />
                     )
-                  ) : null}
+                  ) : (
+                    // Handle case where userData is null or undefined
+                    <div> {/* Some fallback UI or another loader */} </div>
+                  )}
                 </Route>
                 <Route
                   exact
@@ -172,6 +214,12 @@ const App = () => {
                 </Route>
                 <Route
                   exact
+                  path="/analytics"
+                >
+                  <Analytics userData={userData} />
+                </Route>
+                <Route
+                  exact
                   path="/profile"
                 >
                   <Profile userData={userData} />
@@ -193,9 +241,9 @@ const App = () => {
                   />
                 </IonTabButton>
                 <IonTabButton
-                  tab=""
+                  tab="analytics"
                   className={`${isCameraActive || !userData?.onboard ? 'invisible' : 'visible'} scale-[0.8]`}
-                  href="#"
+                  href="/analytics"
                 >
                   <IonIcon
                     aria-hidden="true"

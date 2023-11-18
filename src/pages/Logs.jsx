@@ -29,7 +29,7 @@ const Logs = ({ foodData }) => {
 
   return (
     <IonPage>
-      <div className="container h-[90vh] pt-12 pb-6 flex flex-col justify-start gap-4">
+      <div className="container h-[90vh] pt-[4rem] pb-6 flex flex-col justify-start gap-4">
         <div className="flex justify-center">
           <IonDatetime
             presentation="date"
