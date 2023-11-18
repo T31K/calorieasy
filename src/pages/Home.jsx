@@ -1,4 +1,4 @@
-import { IonPage } from '@ionic/react';
+import { IonPage, IonContent } from '@ionic/react';
 import './Tab1.css';
 import { CircularProgressbarWithChildren, buildStyles } from 'react-circular-progressbar';
 import 'react-circular-progressbar/dist/styles.css';
@@ -43,65 +43,67 @@ const Home = ({ userData }) => {
           </CircularProgressbarWithChildren>
         </div>
 
-        <div className="w-full px-6">
-          <div className="flex items-center gap-3 justify-between px-4 my-7">
-            <div>
-              <div className="text-left text-md text-gray-700">Protein</div>
-              <div className="text-left text-xl font-bold">
-                {userData?.current_protein}/{userData?.total_protein}g
+        <IonContent>
+          <div className="w-full px-6">
+            <div className="flex items-center gap-3 justify-between px-4 my-7">
+              <div>
+                <div className="text-left text-md text-gray-700">Protein</div>
+                <div className="text-left text-xl font-bold">
+                  {userData?.current_protein}/{userData?.total_protein}g
+                </div>
+              </div>
+              <div className="w-[200px] bg-[#ADC1FF] h-[6px] rounded-[3px] relative">
+                <div
+                  style={{
+                    width: `${(userData?.current_protein / userData?.total_protein) * 200}px`,
+                    backgroundColor: '#7C8EF1',
+                    height: '6px',
+                    borderRadius: '3px',
+                  }}
+                  className="absolute"
+                ></div>
               </div>
             </div>
-            <div className="w-[200px] bg-[#ADC1FF] h-[6px] rounded-[3px] relative">
-              <div
-                style={{
-                  width: `${(userData?.current_protein / userData?.total_protein) * 200}px`,
-                  backgroundColor: '#7C8EF1',
-                  height: '6px',
-                  borderRadius: '3px',
-                }}
-                className="absolute"
-              ></div>
-            </div>
-          </div>
-          <div className="flex items-center gap-3 justify-between px-4 my-7">
-            <div>
-              <div className="text-left text-md text-gray-700">Carbs</div>
-              <div className="text-left text-xl font-bold">
-                {userData?.current_carbs}/{userData?.total_carbs}g
+            <div className="flex items-center gap-3 justify-between px-4 my-7">
+              <div>
+                <div className="text-left text-md text-gray-700">Carbs</div>
+                <div className="text-left text-xl font-bold">
+                  {userData?.current_carbs}/{userData?.total_carbs}g
+                </div>
+              </div>
+              <div className="w-[200px] bg-[#ffffa4] h-[6px] rounded-[3px] relative">
+                <div
+                  style={{
+                    width: `${(userData?.current_carbs / userData?.total_carbs) * 200}px`,
+                    backgroundColor: '#F1F17C',
+                    height: '6px',
+                    borderRadius: '3px',
+                  }}
+                  className="absolute"
+                ></div>
               </div>
             </div>
-            <div className="w-[200px] bg-[#ffffa4] h-[6px] rounded-[3px] relative">
-              <div
-                style={{
-                  width: `${(userData?.current_carbs / userData?.total_carbs) * 200}px`,
-                  backgroundColor: '#F1F17C',
-                  height: '6px',
-                  borderRadius: '3px',
-                }}
-                className="absolute"
-              ></div>
-            </div>
-          </div>
-          <div className="flex items-center gap-3 justify-between px-4 my-7">
-            <div>
-              <div className="text-left text-md text-gray-700">Fat</div>
-              <div className="text-left text-xl font-bold">
-                {userData?.current_fat}/{userData?.total_fat}g
+            <div className="flex items-center gap-3 justify-between px-4 my-7">
+              <div>
+                <div className="text-left text-md text-gray-700">Fat</div>
+                <div className="text-left text-xl font-bold">
+                  {userData?.current_fat}/{userData?.total_fat}g
+                </div>
+              </div>
+              <div className="w-[200px] bg-[#ed9c9c] h-[6px] rounded-[3px] relative">
+                <div
+                  style={{
+                    width: `${(userData?.current_fat / userData?.total_fat) * 200}px`,
+                    backgroundColor: '#F17C7C',
+                    height: '6px',
+                    borderRadius: '3px',
+                  }}
+                  className="absolute"
+                ></div>
               </div>
             </div>
-            <div className="w-[200px] bg-[#ed9c9c] h-[6px] rounded-[3px] relative">
-              <div
-                style={{
-                  width: `${(userData?.current_fat / userData?.total_fat) * 200}px`,
-                  backgroundColor: '#F17C7C',
-                  height: '6px',
-                  borderRadius: '3px',
-                }}
-                className="absolute"
-              ></div>
-            </div>
           </div>
-        </div>
+        </IonContent>
       </div>
     </IonPage>
   );
