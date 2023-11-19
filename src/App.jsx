@@ -295,7 +295,7 @@ const App = () => {
           <IonAlert
             trigger="present-alert"
             header="Upgrade to premium!"
-            subHeader={`${userData?.remaining_api_calls}/3 tokens left!`}
+            subHeader={`${userData?.remaining_api_calls}/3 tokens left today!`}
             message="Premium users have unlimited tokens!"
             buttons={[
               {
