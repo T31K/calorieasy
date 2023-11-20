@@ -5,6 +5,7 @@ import { Auth0Provider } from '@auth0/auth0-react';
 const container = document.getElementById('root');
 const root = createRoot(container);
 const CLIENT_ID = import.meta.env.VITE_AUTH_CLIENT_ID;
+import { Analytics } from '@vercel/analytics/react';
 
 root.render(
   <React.StrictMode>
@@ -17,6 +18,7 @@ root.render(
       }}
     >
       <App />
+      <Analytics />
     </Auth0Provider>
   </React.StrictMode>
 );
