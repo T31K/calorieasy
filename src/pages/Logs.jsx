@@ -1,12 +1,18 @@
 import { useEffect, useState } from 'react';
-import { IonContent, IonDatetime, IonPage, IonChip, IonSpinner } from '@ionic/react';
+import { useHistory } from 'react-router-dom';
 import UpDirection from '../components/UpDirection';
-import { today, convertTime24to12, sortItemsByTimestampDesc } from '../utils/dateUtils';
+import { today, convertTime24to12 } from '../utils/dateUtils';
+import { IonContent, IonDatetime, IonPage, IonChip, IonSpinner, IonHeader, IonToolbar, IonTitle } from '@ionic/react';
 
-const Logs = ({ foodData }) => {
+const Logs = ({ foodData, userData }) => {
   const [items, setItems] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [selectedDate, setSelectedDate] = useState(null);
+  const history = useHistory();
+
+  const navigateToShow = (id) => {
+    history.push(`/show/${id}`);
+  };
 
   useEffect(() => {
     const formattedDate = today();
@@ -29,24 +35,39 @@ const Logs = ({ foodData }) => {
 
   return (
     <IonPage>
-      <div className="container h-[90vh] pt-[4rem] pb-6 flex flex-col justify-start gap-4">
-        <div className="flex justify-center">
-          <IonDatetime
-            presentation="date"
-            className="rounded-3xl border border-stone-200"
-            onIonChange={(e) => handleIonChange(e)}
-          />
-        </div>
-        <IonContent>
+      <IonHeader>
+        <IonToolbar className="pb-3 flex items-center justify-between px-3">
+          <IonTitle>
+            <div
+              className={`bg-[#58F168] w-[150px] mx-auto h-[35px] rounded-full flex items-center justify-center ${
+                userData?.premium && 'invisible'
+              }`}
+            >
+              {' '}
+              {userData?.premium !== undefined &&
+                `${userData?.remaining_api_calls ?? 0} ${
+                  userData?.remaining_api_calls <= 1 ? ' token left' : 'tokens left'
+                }`}
+            </div>
+          </IonTitle>
+        </IonToolbar>
+      </IonHeader>
+      <IonContent>
+        <div className="py-6 flex flex-col justify-start gap-4">
+          <div className="flex justify-center">
+            <IonDatetime
+              presentation="date"
+              className="rounded-3xl border border-stone-200"
+              onIonChange={(e) => handleIonChange(e)}
+            />
+          </div>
           <div className="w-[85%] mx-auto">
             {isLoading && <IonSpinner name="lines-small"></IonSpinner>}
             {items?.map((item, key) => (
               <div
                 key={key}
                 className="border border-stone-200 rounded-2xl flex flex-col items-start justify-between w-full p-4 mb-3"
-                onClick={() => {
-                  window.location = `/show/${item.id}`;
-                }}
+                onClick={() => navigateToShow(item.id)}
               >
                 <div className="flex justify-between gap-2 w-full">
                   <div className="flex items-center gap-2">
@@ -55,10 +76,12 @@ const Logs = ({ foodData }) => {
                         item.loading && 'skeleton'
                       }`}
                     >
-                      {item.emoji}
+                      {item.emoji.substring(0, 2)}
                     </div>
                     <div className="flex flex-col items-start justify-end">
-                      <div className="text-lg font-semibold">{item.name}</div>
+                      <div className="text-lg font-semibold whitespace-nowrap">
+                        {item.name.length >= 20 ? item.name.substring(0, 20) + '...' : item.name}
+                      </div>
                       <div className="text-gray-600 mt-[-5px]">
                         {item.calories ? `${item.calories} kcal` : `'Calculating...'`}
                       </div>
@@ -123,8 +146,8 @@ const Logs = ({ foodData }) => {
               <></>
             )}
           </div>
-        </IonContent>
-      </div>
+        </div>
+      </IonContent>
     </IonPage>
   );
 };

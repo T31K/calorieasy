@@ -1,11 +1,18 @@
+import axios from 'axios';
 import { useEffect, useState } from 'react';
-import { IonContent, IonPage, IonHeader, IonBackButton, IonToolbar, IonButton } from '@ionic/react';
-import { useLocation } from 'react-router';
+import { useHistory } from 'react-router-dom';
+import { useLocation, useParams } from 'react-router';
+import { chevronBackOutline, trashOutline } from 'ionicons/icons';
+import { IonContent, IonIcon, IonHeader, IonTitle, IonToolbar, IonPage } from '@ionic/react';
+
+const serverDeleteUrl = import.meta.env.VITE_SERVER_DELETE_URL;
 
 const Logs = ({ foodData }) => {
   const [item, setItem] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const location = useLocation();
+  const history = useHistory();
+  const { id } = useParams();
 
   useEffect(() => {
     if (location && foodData) {
@@ -14,9 +21,11 @@ const Logs = ({ foodData }) => {
     }
   }, [location, foodData]);
 
-  function findArrayWithId(data) {
-    let id = location?.pathname?.split('/').pop();
+  const goBack = () => {
+    history.goBack();
+  };
 
+  function findArrayWithId(data) {
     for (const key in data) {
       if (data.hasOwnProperty(key)) {
         const array = data[key];
@@ -27,51 +36,65 @@ const Logs = ({ foodData }) => {
         if (foundItem) return foundItem;
       }
     }
-    return null; // Return null if no matching id is found
+    return null;
+  }
+
+  async function handleDelete() {
+    try {
+      if (!id) return;
+      const res = await axios.post(`${serverDeleteUrl}`, { id });
+      if (res.status === 200) window.location.href = '/logs';
+    } catch (error) {
+      console.error('Error deleting food item:', error);
+    }
   }
 
   return (
-    <>
-      {!isLoading ? (
-        <>
-          <IonHeader>
-            <IonToolbar className="pb-3 flex items-center ">
-              <div
-                className="bg-gray-300 w-[120px]  text-center active:bg-gray-400  font-bold py-2 mt-2 px-4 rounded-lg"
-                onClick={() => {
-                  history.back();
-                }}
-              >
-                Back
-              </div>
-            </IonToolbar>
-          </IonHeader>
-          <div className="container h-[90vh] pt-6 pb-6 flex flex-col justify-start gap-4">
-            <div className="h-[120px] bg-stone-50 rounded-xl border flex justify-center items-center gap-6">
-              <div className="tracking-tight text-2xl font-bold text-center ">{item?.emoji} </div>
-              <div className="tracking-tight text-2xl font-bold text-center ">{item?.name} </div>
-              <div className="tracking-tight text-2xl font-bold text-center ">{item?.calories} kcal </div>
+    <IonPage>
+      <IonHeader>
+        <IonToolbar className="pb-3 flex items-center justify-between px-3">
+          <IonIcon
+            aria-hidden="true"
+            className="text-3xl"
+            icon={chevronBackOutline}
+            onClick={goBack}
+          />
+          <IonTitle>Food Details</IonTitle>
+          <IonIcon
+            aria-hidden="true"
+            className="text-3xl float-right"
+            icon={trashOutline}
+            onClick={handleDelete}
+          />
+        </IonToolbar>
+      </IonHeader>
+      <IonContent>
+        <div className="py-6 px-4 flex flex-col justify-start gap-3">
+          <div className="bg-stone-50 rounded-xl border flex flex-col relative justify-center items-center gap-6 mb-6 py-4">
+            <div className="tracking-tight text-5xl font-bold text-center ">{item?.emoji} </div>
+            <div className="tracking-tight text-2xl w-[300px] font-bold text-center ">{item?.name} </div>
+            <div className="flex gap-3">
+              <div>Protein: {item?.protein}g</div>
+              <div>Carbs: {item?.carbs}g</div>
+              <div>Fat: {item?.fat}g</div>
             </div>
-            <IonContent>
-              {item?.macros?.map((macro, index) => (
-                <div
-                  key={index}
-                  className="h-[50px] bg-stone-50 rounded-xl border flex items-center gap-8 my-2"
-                >
-                  <div className="ml-5 text-2xl">{macro?.emoji}</div>
-                  <div className="tracking-tight font-semibold w-[40%] whitespace-nowrap capitalize">{macro?.name}</div>
-                  <div className="tracking-tight font-semibold text-right w-[30%]">{macro?.calories}</div>
-                </div>
-              ))}
-            </IonContent>
+            <div className="tracking-tight text-md font-semibold text-center absolute top-3 rounded-full bg-green-300 px-3 right-3">
+              {item?.calories} kcal{' '}
+            </div>
           </div>
-        </>
-      ) : (
-        <div className="absolute h-[90vh] w-full bg-[#222222] opacity-50 flex pt-[70%] justify-center">
-          <span className="loader"></span>
+          {item?.macros?.map((macro, index) => (
+            <div
+              key={index}
+              className="h-[50px] bg-stone-50 rounded-xl border flex items-center gap-8"
+            >
+              <div className="ml-5 text-2xl">{macro?.emoji ? macro.emoji : '👍🏻'}</div>
+              <div className="tracking-tight font-semibold w-[40%] whitespace-nowrap capitalize">{macro?.name}</div>
+              <div className="tracking-tight font-semibold text-right w-[30%]">{macro?.calories}</div>
+            </div>
+          ))}
         </div>
-      )}
-    </>
+      </IonContent>
+    </IonPage>
   );
 };
 

@@ -1,11 +1,10 @@
-import { IonPage, IonContent } from '@ionic/react';
-import './Tab1.css';
+import { IonPage, IonContent, IonToolbar, IonTitle, IonIcon, IonHeader } from '@ionic/react';
 import { CircularProgressbarWithChildren, buildStyles } from 'react-circular-progressbar';
 import 'react-circular-progressbar/dist/styles.css';
 
 const Home = ({ userData }) => {
   const countPathColor = () => {
-    if (!userData?.total_calories) return; // Handle division by zero or undefined
+    if (!userData?.total_calories) return '58F168';
 
     let val = (userData?.current_calories / userData?.total_calories) * 100;
 
@@ -22,30 +21,48 @@ const Home = ({ userData }) => {
 
   return (
     <IonPage>
-      <div className="container h-[90vh] pt-12 pb-6 flex flex-col justify-around gap-4">
-        <div className="flex gap-2 pl-5">
-          <h1 className="text-left text-xl font-semibold">
-            {userData?.name ? `Welcome back, ${userData?.name}! 👋` : null}
-          </h1>
-        </div>
-        <div className="flex justify-center ">
-          <CircularProgressbarWithChildren
-            value={(userData?.current_calories / (userData?.total_calories ? userData?.total_calories : 4000)) * 100}
-            styles={buildStyles({
-              pathColor: countPathColor(),
-              trailColor: '#E7FDE8',
-              strokeWidth: 10,
-            })}
-          >
-            <div className="text-xl font-semibold">
-              {userData?.total_calories ? `Goal ${userData?.total_calories}` : null}
+      <IonHeader>
+        <IonToolbar className="pb-3 flex items-center justify-between px-3">
+          <IonTitle>
+            <div
+              className={`bg-[#58F168] w-[150px] mx-auto h-[35px] rounded-full flex items-center justify-center ${
+                userData?.premium && 'invisible'
+              }`}
+            >
+              {' '}
+              {userData?.premium !== undefined &&
+                `${userData?.remaining_api_calls ?? 0} ${
+                  userData?.remaining_api_calls <= 1 ? ' token left' : 'tokens left'
+                }`}
             </div>
-            <div className="text-6xl font-bold my-2">{userData?.current_calories}</div>
-            <div className="text-2xl mt-[-5px] font-medium">calories</div>
-          </CircularProgressbarWithChildren>
-        </div>
+          </IonTitle>
+        </IonToolbar>
+      </IonHeader>
+      <IonContent>
+        <div className="py-6 px-4 flex flex-col justify-start gap-4">
+          <div className="flex gap-2 pl-5">
+            <h1 className="text-left text-xl font-semibold">
+              {userData?.name ? `Welcome back, ${userData?.name}! 👋` : null}
+            </h1>
+          </div>
 
-        <IonContent>
+          <div className="flex justify-center ">
+            <CircularProgressbarWithChildren
+              value={(userData?.current_calories / (userData?.total_calories ? userData?.total_calories : 4000)) * 100}
+              styles={buildStyles({
+                pathColor: countPathColor(),
+                trailColor: '#E7FDE8',
+                strokeWidth: 10,
+              })}
+            >
+              <div className="text-xl font-semibold">
+                {userData?.total_calories ? `Goal ${userData?.total_calories}` : null}
+              </div>
+              <div className="text-6xl font-bold my-2">{userData?.current_calories}</div>
+              <div className="text-2xl mt-[-5px] font-medium">calories</div>
+            </CircularProgressbarWithChildren>
+          </div>
+
           <div className="w-full px-6">
             <div className="flex items-center gap-3 justify-between px-4 my-7">
               <div>
@@ -108,8 +125,8 @@ const Home = ({ userData }) => {
               </div>
             </div>
           </div>
-        </IonContent>
-      </div>
+        </div>
+      </IonContent>
     </IonPage>
   );
 };

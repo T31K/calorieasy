@@ -95,3 +95,7 @@
     box-shadow: inset 0px 0px 0px 36px transparent; /* increased by 20% and updated color */
   }
 }
+
+.top-dog {
+  z-index: 99999;
+}

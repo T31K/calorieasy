@@ -1,7 +1,7 @@
-import { Route } from 'react-router-dom';
-import { useEffect, useState } from 'react';
 import axios from 'axios';
 import { v4 as uuid } from 'uuid';
+import { useEffect, useState } from 'react';
+import { Route, Redirect } from 'react-router-dom';
 import {
   IonApp,
   IonIcon,
@@ -38,10 +38,12 @@ import '@ionic/react/css/display.css';
 
 import './theme/variables.css';
 import './theme/global.css';
+
 setupIonicReact({
   rippleEffect: false,
   platform: 'ios',
 });
+
 const serverInitUrl = import.meta.env.VITE_SERVER_INIT;
 const serverCheckoutUrl = import.meta.env.VITE_SERVER_CHECKOUT_URL;
 
@@ -51,9 +53,11 @@ const App = () => {
 
   const [userData, setUserData] = useState({});
   const [foodData, setFoodData] = useState({});
+
+  const [isAuth, setIsAuth] = useState(false);
+  const [isNew, setIsNew] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [isCameraActive, setIsCameraActive] = useState(false);
-  const [isAuth, setIsAuth] = useState(false);
 
   useEffect(() => {
     async function initStore() {
@@ -63,6 +67,7 @@ const App = () => {
       setDataStore(store);
       const adminRes = await store?.get('admin');
       if (adminRes) setAdminData(adminRes);
+      else setIsNew(true);
     }
     initStore();
   }, []);
@@ -89,12 +94,14 @@ const App = () => {
       });
       setIsLoading(false);
       setIsAuth(true);
+      setIsNew(false);
     } catch (error) {
       console.error('Error in creating user:', error);
     }
   };
 
   const fetchUserData = async (adminId) => {
+    setIsNew(false);
     try {
       const res = await axios.get(`${serverInitUrl}`, { params: { id: adminId } });
       const { user, foodsByDate } = res.data;
@@ -134,22 +141,13 @@ const App = () => {
   }
 
   function handleCameraClick(e) {
-    if (userData?.premium) {
-      setIsCameraActive(true);
-      window.location.href = '/camera';
-    } else {
-      const button = document.getElementById('present-alert');
-      button?.click();
-      e?.stopPropagation();
-    }
-  }
+    const isUserPremium = userData?.premium;
+    const hasRemainingApiCalls = userData?.remaining_api_calls > 0;
 
-  function handleUpgradeClick(param) {
-    if (param == 'continue') {
+    if (isUserPremium || hasRemainingApiCalls) {
       setIsCameraActive(true);
       window.location.href = '/camera';
-    } else {
-      handleCheckout();
+      e?.stopPropagation();
     }
   }
 
@@ -167,44 +165,30 @@ const App = () => {
       }
     } catch (error) {
       console.error('Error creating checkout session:', error);
-      // Handle errors here (e.g., show error message to the user)
     }
   };
 
   return (
     <>
-      {isAuth ? (
+      {!isNew ? (
         <IonApp>
           <IonReactRouter>
             <IonTabs>
               <IonRouterOutlet>
-                <Route
+                <Redirect
                   exact
                   path="/"
+                  to="/home"
+                />
+                <Route
+                  exact
+                  path="/home"
                 >
-                  {isLoading ? (
-                    // Loading state
-                    <div className="absolute h-[100vh] w-full bg-[#b9e0bb] opacity-[40%] flex items-center justify-center">
-                      <span className="loader"></span>
-                    </div>
-                  ) : userData ? (
-                    // Check if user is onboarded
-                    !userData.onboard ? (
-                      <Home
-                        dataStore={dataStore}
-                        userData={userData}
-                        setUserData={setUserData}
-                      />
-                    ) : (
-                      <Onboard
-                        dataStore={dataStore}
-                        userData={userData}
-                        setUserData={setUserData}
-                      />
-                    )
-                  ) : (
-                    <></>
-                  )}
+                  <Home
+                    dataStore={dataStore}
+                    userData={userData}
+                    setUserData={setUserData}
+                  />
                 </Route>
                 <Route
                   exact
@@ -222,7 +206,7 @@ const App = () => {
                     foodData={foodData}
                   />
                 </Route>
-                <Route path="/show">
+                <Route path="/show/:id">
                   <Show
                     userData={userData}
                     foodData={foodData}
@@ -255,12 +239,12 @@ const App = () => {
               <IonTabBar
                 slot="bottom"
                 color={isCameraActive ? '' : 'light '}
-                className={isCameraActive ? 'hidden' : 'pt-2 pb-4 '}
+                className={isCameraActive ? 'hidden' : 'pt-2 pb-8'}
               >
                 <IonTabButton
                   tab="home"
                   className={`${isCameraActive ? 'invisible' : 'visible'} scale-[0.8]`}
-                  href="/"
+                  href="/home"
                 >
                   <IonIcon
                     aria-hidden="true"
@@ -305,9 +289,10 @@ const App = () => {
               </IonTabBar>
             </IonTabs>
           </IonReactRouter>
+
           {!isCameraActive ? (
             <div
-              className="absolute bottom-[12px] w-[70px] text-3xl h-[70px] flex items-center justify-center bg-[#58F168] onTop rounded-full left-[50%] mb-5 transform -translate-x-1/2"
+              className="absolute bottom-[24px] w-[70px] text-3xl h-[70px] flex items-center justify-center bg-[#58F168] onTop rounded-full left-[50%] mb-5 transform -translate-x-1/2"
               onClick={(e) => handleCameraClick(e)}
             >
               <IonIcon
@@ -318,34 +303,12 @@ const App = () => {
           ) : (
             <></>
           )}
-          <IonButton
-            id="present-alert"
-            className="invisible"
-          >
-            Click Me
-          </IonButton>
-          <IonAlert
-            trigger="present-alert"
-            header="Upgrade to premium!"
-            subHeader={`${userData?.remaining_api_calls}/3 tokens left today!`}
-            message="Premium users have unlimited tokens!"
-            buttons={[
-              {
-                text: 'Continue',
-                handler: () => handleUpgradeClick('continue'),
-              },
-              {
-                text: 'Upgrade!',
-                handler: () => handleUpgradeClick('upgrade'),
-              },
-            ]}
-          ></IonAlert>
         </IonApp>
       ) : (
         <Login
           dataStore={dataStore}
           createUser={createUser}
-          isAuth={isAuth}
+          isNew={isNew}
         />
       )}
     </>
