@@ -1,5 +1,4 @@
-import { useEffect, useState } from 'react';
-// Import Swiper React components
+import { useState } from 'react';
 import { Swiper, SwiperSlide } from 'swiper/react';
 import {
   IonIcon,
@@ -14,21 +13,22 @@ import {
 } from '@ionic/react';
 import { CircularProgressbarWithChildren, buildStyles } from 'react-circular-progressbar';
 import 'react-circular-progressbar/dist/styles.css';
-
 // Import Swiper styles
 import 'swiper/css';
 import 'swiper/css/pagination';
 import 'swiper/css/effect-fade';
 import 'swiper/css/navigation';
 import './onboard.css';
-// import required modules
 import { EffectFade, Navigation } from 'swiper/modules';
 import { heightList } from '../utils/heightList';
 import Icon from '../assets/icon.png';
 import { calculateTdee } from '../utils/tdeeCalc';
 import { addCircleOutline, removeCircleOutline } from 'ionicons/icons';
+import axios from 'axios';
 
-export default function Onboard({ adminData, setAdminData, dataStore }) {
+const serverUpdateUrl = import.meta.env.VITE_SERVER_UPDATE_USER;
+
+export default function Onboard({ userData, setUserData }) {
   const [activeSlide, setActiveSlide] = useState(0);
   const [totalCalories, setTotalCalories] = useState(null);
 
@@ -44,21 +44,17 @@ export default function Onboard({ adminData, setAdminData, dataStore }) {
 
   async function handleNextBtnClick() {
     if (activeSlide == 6) {
-      const res = calculateTdee(adminData);
-      setTotalCalories(res);
+      let totals = calculateTdee(userData);
+      setTotalCalories(totals.tdee);
       handleNext();
     } else if (activeSlide == 7) {
-      await dataStore?.set(
-        'admin',
-        JSON.stringify({
-          ...adminData,
-          total_calories: `${totalCalories}`,
-          onboard: true,
-        })
-      );
-      setAdminData({
-        ...adminData,
-        total_calories: `${totalCalories}`,
+      let calculatedVal = calculateTdee(userData);
+      updateUser({
+        ...userData,
+        total_calories: calculatedVal.tdee,
+        total_protein: calculatedVal.protein,
+        total_carbs: calculatedVal.carbs,
+        total_fat: calculatedVal.fat,
         onboard: true,
       });
     } else {
@@ -66,10 +62,20 @@ export default function Onboard({ adminData, setAdminData, dataStore }) {
     }
   }
 
+  async function updateUser(userObj) {
+    try {
+      const res = await axios.post(`${serverUpdateUrl}`, userObj);
+      if (res.status === 200) window.location.href = '/';
+    } catch (error) {
+      console.error('Error updating user:', error);
+    }
+  }
+
   function disableNext() {
-    if (activeSlide == 0) return false;
-    const fields = ['age', 'age', 'weight', 'height', 'gender', 'activity', 'goal']; // adjust if more fields
-    return adminData[fields[activeSlide]]?.length === 0;
+    if (activeSlide === 0) return false;
+    const fields = ['age', 'age', 'weight', 'height', 'gender', 'activity', 'goal'];
+    const fieldValue = userData[fields[activeSlide]];
+    return fieldValue === 0 || fieldValue === '' || fieldValue?.length == 1;
   }
 
   return (
@@ -82,7 +88,7 @@ export default function Onboard({ adminData, setAdminData, dataStore }) {
         onSlideChange={(e) => setActiveSlide(e?.activeIndex)}
       >
         <SwiperSlide className="flex flex-col items-center justify-center pb-20">
-          <h1 className="text-4xl font-bold tracking-tight mt-[150px] mb-8 text-stone-900">Welcome to Calorieasy!</h1>
+          <h1 className="text-4xl font-bold tracking-tight mt-[150px] mb-8 text-stone-900">Welcome!</h1>
           <img
             src={Icon}
             alt=""
@@ -100,8 +106,8 @@ export default function Onboard({ adminData, setAdminData, dataStore }) {
               className="w-[50px]"
               placeholder="25"
               onIonChange={(e) =>
-                setAdminData({
-                  ...adminData,
+                setUserData({
+                  ...userData,
                   age: `${e.target.value}`,
                 })
               }
@@ -111,15 +117,16 @@ export default function Onboard({ adminData, setAdminData, dataStore }) {
         </SwiperSlide>
         <SwiperSlide className="flex flex-col items-center justify-center pb-20">
           <div className="font-semibold text-xl mb-5  text-gray-800">What is your weight?</div>
+
           <div className="w-[70%] !text-gray-800">
             <IonSegment
               onIonChange={(e) =>
-                setAdminData({
-                  ...adminData,
+                setUserData({
+                  ...userData,
                   system: `${e.target.value}`,
                 })
               }
-              value={adminData?.system}
+              value={userData?.system}
             >
               <IonSegmentButton value="metric">
                 <IonLabel>Metric</IonLabel>
@@ -135,13 +142,13 @@ export default function Onboard({ adminData, setAdminData, dataStore }) {
               className="w-[50px]"
               placeholder="00"
               onIonChange={(e) =>
-                setAdminData({
-                  ...adminData,
+                setUserData({
+                  ...userData,
                   weight: `${e.target.value}`,
                 })
               }
             ></IonInput>
-            {adminData?.system == 'metric' ? 'kg' : 'lbs'}
+            {userData?.system == 'metric' ? 'kg' : 'lbs'}
           </div>
         </SwiperSlide>
         <SwiperSlide className="flex flex-col items-center justify-center pb-20">
@@ -149,12 +156,13 @@ export default function Onboard({ adminData, setAdminData, dataStore }) {
           <div className="w-[70%] !text-gray-800">
             <IonSegment
               onIonChange={(e) =>
-                setAdminData({
-                  ...adminData,
+                setUserData({
+                  ...userData,
                   system: `${e.target.value}`,
                 })
               }
-              value={adminData?.system}
+              value={userData?.system}
+              disabled
             >
               <IonSegmentButton value="metric">
                 <IonLabel>Metric</IonLabel>
@@ -164,15 +172,15 @@ export default function Onboard({ adminData, setAdminData, dataStore }) {
               </IonSegmentButton>
             </IonSegment>
           </div>
-          {adminData?.system == 'metric' ? (
+          {userData?.system == 'metric' ? (
             <div className="flex items-center !text-gray-800">
               <IonInput
                 type="number"
-                className="w-[50px]"
-                placeholder="000"
+                className="w-[50px] !text-gray-900"
+                placeholder="182"
                 onIonChange={(e) =>
-                  setAdminData({
-                    ...adminData,
+                  setUserData({
+                    ...userData,
                     height: `${e.target.value}`,
                   })
                 }
@@ -182,10 +190,11 @@ export default function Onboard({ adminData, setAdminData, dataStore }) {
           ) : (
             <div>
               <IonSelect
-                placeholder={adminData?.system == 'metric' ? '150' : `4ft 5in`}
+                placeholder={userData?.system == 'metric' ? '150' : `4ft 5in`}
+                className="!text-black"
                 onIonChange={(e) =>
-                  setAdminData({
-                    ...adminData,
+                  setUserData({
+                    ...userData,
                     height: `${e.target.value}`,
                   })
                 }
@@ -207,10 +216,10 @@ export default function Onboard({ adminData, setAdminData, dataStore }) {
           <div className="font-semibold text-xl mb-2 text-gray-800">What is your gender?</div>
           <div className="w-[70%] w-full flex items-center justify-center mt-4 mr-5 !text-gray-800">
             <IonRadioGroup
-              value={adminData?.gender}
+              value={userData?.gender}
               onIonChange={(e) =>
-                setAdminData({
-                  ...adminData,
+                setUserData({
+                  ...userData,
                   gender: `${e.target.value}`,
                 })
               }
@@ -249,8 +258,8 @@ export default function Onboard({ adminData, setAdminData, dataStore }) {
               className="text-gray-800"
               placeholder="Sedentary (office job)"
               onIonChange={(e) =>
-                setAdminData({
-                  ...adminData,
+                setUserData({
+                  ...userData,
                   activity: `${e.target.value}`,
                 })
               }
@@ -271,8 +280,8 @@ export default function Onboard({ adminData, setAdminData, dataStore }) {
               className="text-gray-800"
               placeholder="Lose weight"
               onIonChange={(e) =>
-                setAdminData({
-                  ...adminData,
+                setUserData({
+                  ...userData,
                   goal: `${e.target.value}`,
                 })
               }
@@ -312,7 +321,7 @@ export default function Onboard({ adminData, setAdminData, dataStore }) {
           </div>
         </SwiperSlide>
       </Swiper>
-      <div className="h-[10%] flex px-12 items-center justify-between ">
+      <div className={`h-[10%] flex px-12 items-center justify-between`}>
         <div
           onClick={handlePrev}
           className={`bg-gray-300 w-[120px]  text-center active:bg-gray-400 text-gray-800 font-bold py-2 px-4 rounded-lg ${

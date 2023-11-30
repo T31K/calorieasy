@@ -1,20 +1,9 @@
 import { useEffect, useState } from 'react';
-import {
-  IonContent,
-  IonDatetime,
-  IonPage,
-  IonLabel,
-  IonChip,
-  IonSpinner,
-  IonItem,
-  IonItemSliding,
-  IonItemOption,
-  IonItemOptions,
-} from '@ionic/react';
+import { IonContent, IonDatetime, IonPage, IonChip, IonSpinner } from '@ionic/react';
 import UpDirection from '../components/UpDirection';
-import { today, convertTime12to24, sortItemsByTimestampDesc } from '../utils/dateUtils';
+import { today, convertTime24to12, sortItemsByTimestampDesc } from '../utils/dateUtils';
 
-const Logs = ({ dataStore }) => {
+const Logs = ({ foodData }) => {
   const [items, setItems] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [selectedDate, setSelectedDate] = useState(null);
@@ -25,35 +14,22 @@ const Logs = ({ dataStore }) => {
   }, []);
 
   useEffect(() => {
-    if (selectedDate && dataStore) fetchFromStore();
-  }, [selectedDate, dataStore]);
+    if (selectedDate && foodData) {
+      if (foodData[selectedDate]) {
+        setItems(foodData[selectedDate]);
+      }
+      setIsLoading(false);
+    }
+  }, [selectedDate, foodData]);
 
   async function handleIonChange(e) {
     const { value } = e.target;
     setSelectedDate(value.slice(0, 10));
   }
 
-  async function fetchFromStore() {
-    setItems([]);
-    setIsLoading(true);
-    try {
-      const res = await dataStore.get(`foods:${selectedDate}`);
-      if (res) {
-        let resItems = JSON.parse(res);
-        resItems = sortItemsByTimestampDesc(resItems);
-        setItems(resItems);
-      } else {
-        setItems([]);
-      }
-    } catch (error) {
-      console.error('Error fetching from data store:', error);
-    }
-    setIsLoading(false);
-  }
-
   return (
     <IonPage>
-      <div className="container h-[90vh] pt-12 pb-6 flex flex-col justify-start gap-4">
+      <div className="container h-[90vh] pt-[4rem] pb-6 flex flex-col justify-start gap-4">
         <div className="flex justify-center">
           <IonDatetime
             presentation="date"
@@ -68,6 +44,9 @@ const Logs = ({ dataStore }) => {
               <div
                 key={key}
                 className="border border-stone-200 rounded-2xl flex flex-col items-start justify-between w-full p-4 mb-3"
+                onClick={() => {
+                  window.location = `/show/${item.id}`;
+                }}
               >
                 <div className="flex justify-between gap-2 w-full">
                   <div className="flex items-center gap-2">
@@ -86,7 +65,7 @@ const Logs = ({ dataStore }) => {
                     </div>
                   </div>
                   <div>
-                    <IonChip color="dark">{item.timestamp}</IonChip>
+                    <IonChip color="dark">{convertTime24to12(item.timestamp)}</IonChip>
                   </div>
                 </div>
                 <div className="flex gap-8 w-full pt-5">

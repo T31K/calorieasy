@@ -30,6 +30,14 @@ function convertTime12to24(time12h) {
   return `${hours}:${minutes}`;
 }
 
+function convertTime24to12(time24h) {
+  const [hours24, minutes, seconds] = time24h.split(':');
+  const hours12 = ((parseInt(hours24, 10) + 11) % 12) + 1; // Convert 24h to 12h format
+  const modifier = parseInt(hours24, 10) >= 12 ? 'PM' : 'AM';
+
+  return `${hours12}:${minutes}${modifier}`;
+}
+
 function sortItemsByTimestampDesc(items) {
   return items.sort((a, b) => {
     const timeA = convertTime12to24(a.timestamp);
@@ -38,4 +46,4 @@ function sortItemsByTimestampDesc(items) {
   });
 }
 
-export { today, currentTime, convertTime12to24, sortItemsByTimestampDesc };
+export { today, currentTime, convertTime12to24, convertTime24to12, sortItemsByTimestampDesc };

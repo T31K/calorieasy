@@ -12,6 +12,7 @@
     "lint": "eslint"
   },
   "dependencies": {
+    "@auth0/auth0-react": "^2.2.3",
     "@capacitor-community/camera-preview": "^5.0.0",
     "@capacitor/app": "5.0.6",
     "@capacitor/camera": "^5.0.7",
@@ -21,11 +22,13 @@
     "@capacitor/keyboard": "5.0.6",
     "@capacitor/splash-screen": "^5.0.6",
     "@capacitor/status-bar": "5.0.6",
+    "@clerk/clerk-react": "^4.28.0",
     "@ionic/react": "^7.0.0",
     "@ionic/react-router": "^7.0.0",
     "@ionic/storage": "^4.0.0",
     "@types/react-router": "^5.1.20",
     "@types/react-router-dom": "^5.3.3",
+    "@vercel/analytics": "^1.1.1",
     "axios": "^1.6.0",
     "capacitor-video-player": "^5.0.2",
     "formidable": "^3.5.1",
@@ -37,6 +40,7 @@
     "react-range": "^1.8.14",
     "react-router": "^5.3.4",
     "react-router-dom": "^5.3.4",
+    "react-webcam": "^7.2.0",
     "swiper": "^11.0.4",
     "uuid": "^9.0.1"
   },

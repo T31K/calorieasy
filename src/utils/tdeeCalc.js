@@ -11,7 +11,6 @@ function calculateTdee(obj) {
     let [feet, inches] = obj.height.split('ft ');
     inches = inches.replace('in', '');
     height = parseInt(feet, 10) * 30.48 + parseInt(inches, 10) * 2.54; // Convert feet and inches to cm
-
     // Convert weight from pounds to kg
     weight = weight * 0.453592;
   }
@@ -37,7 +36,27 @@ function calculateTdee(obj) {
     athlete: 1.9,
   };
 
-  return Math.round(bmr * activityFactors[obj.activity]);
+  const tdee = Math.round(bmr * activityFactors[obj.activity]);
+
+  // Macros calculations
+  const proteinPercentage = 0.3; // 30% of TDEE
+  const fatPercentage = 0.3; // 30% of TDEE
+  const carbsPercentage = 0.4; // 40% of TDEE
+
+  const caloriesFromProtein = tdee * proteinPercentage;
+  const caloriesFromFat = tdee * fatPercentage;
+  const caloriesFromCarbs = tdee * carbsPercentage;
+
+  // Conversion of calories to grams
+  const proteinGrams = caloriesFromProtein / 4;
+  const fatGrams = caloriesFromFat / 9;
+  const carbsGrams = caloriesFromCarbs / 4;
+  return {
+    tdee,
+    protein: Math.round(proteinGrams),
+    fat: Math.round(fatGrams),
+    carbs: Math.round(carbsGrams),
+  };
 }
 
 export { calculateTdee };

@@ -77,3 +77,26 @@ div.item-native {
     animation: shimmer 2.5s infinite linear;
   }
 }
+
+.rainbow {
+  animation: rainbowCycle 5s infinite linear;
+
+}
+@keyframes rainbowCycle {
+  0%   { background-color: #e06c75; } /* Red */
+  14%  { background-color: #d19a66; } /* Orange */
+  28%  { background-color: #e5c07b; } /* Yellow */
+  42%  { background-color: #98c379; } /* Green */
+  57%  { background-color: #56b6c2; } /* Blue */
+  71%  { background-color: #61afef; } /* Indigo */
+  85%  { background-color: #c678dd; } /* Violet */
+  100% { background-color: #e06c75; } /* Red */
+}
+
+.button {
+  animation: rainbowCycle 10s infinite linear;
+}
+
+.select-text {
+  color: #222 !important;
+}
