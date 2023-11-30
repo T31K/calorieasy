@@ -1,7 +1,7 @@
 import { Route } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import axios from 'axios';
-
+import { v4 as uuid } from 'uuid';
 import {
   IonApp,
   IonIcon,
@@ -12,10 +12,8 @@ import {
   setupIonicReact,
   IonButton,
   IonAlert,
-  IonHeader,
-  IonToolbar,
-  IonTitle,
 } from '@ionic/react';
+import { Storage } from '@ionic/storage';
 import { IonReactRouter } from '@ionic/react-router';
 import { add, homeOutline, listOutline, personOutline, statsChartOutline } from 'ionicons/icons';
 import Home from './pages/Home';
@@ -40,7 +38,6 @@ import '@ionic/react/css/display.css';
 
 import './theme/variables.css';
 import './theme/global.css';
-import { useAuth0 } from '@auth0/auth0-react';
 setupIonicReact({
   rippleEffect: false,
   platform: 'ios',
@@ -50,21 +47,56 @@ const serverCheckoutUrl = import.meta.env.VITE_SERVER_CHECKOUT_URL;
 
 const App = () => {
   const [dataStore, setDataStore] = useState(null); // DB
+  const [adminData, setAdminData] = useState(null);
+
   const [userData, setUserData] = useState({});
   const [foodData, setFoodData] = useState({});
   const [isLoading, setIsLoading] = useState(true);
   const [isCameraActive, setIsCameraActive] = useState(false);
-  const { isAuthenticated, user } = useAuth0();
+  const [isAuth, setIsAuth] = useState(false);
 
   useEffect(() => {
-    if (isAuthenticated && user) {
-      fetchUserData(user.sub);
+    async function initStore() {
+      const store = new Storage();
+      await store.create();
+      // store.clear();
+      setDataStore(store);
+      const adminRes = await store?.get('admin');
+      if (adminRes) setAdminData(adminRes);
     }
-  }, [isAuthenticated]);
+    initStore();
+  }, []);
 
-  const fetchUserData = async (userId) => {
+  useEffect(() => {
+    if (adminData) {
+      if (adminData.length == 36) fetchUserData(adminData);
+    }
+  }, [adminData]);
+
+  const createUser = async () => {
+    const generatedUUID = uuid();
+    await dataStore?.set('admin', generatedUUID);
+
     try {
-      const res = await axios.get(`${serverInitUrl}`, { params: { id: userId } });
+      const res = await axios.post('https://api.getharmonize.app/calorieasy/create_user', { user_id: generatedUUID });
+      const { user } = res.data;
+      setUserData({
+        ...user,
+        current_calories: 0,
+        current_protein: 0,
+        current_fat: 0,
+        current_carbs: 0,
+      });
+      setIsLoading(false);
+      setIsAuth(true);
+    } catch (error) {
+      console.error('Error in creating user:', error);
+    }
+  };
+
+  const fetchUserData = async (adminId) => {
+    try {
+      const res = await axios.get(`${serverInitUrl}`, { params: { id: adminId } });
       const { user, foodsByDate } = res.data;
       const { current_calories, current_protein, current_fat, current_carbs } = await updateFoods(foodsByDate);
       setUserData({
@@ -76,6 +108,7 @@ const App = () => {
       });
       setIsLoading(false);
       setFoodData(foodsByDate);
+      setIsAuth(true);
     } catch (error) {
       console.error('Error fetching user data:', error);
     }
@@ -140,7 +173,7 @@ const App = () => {
 
   return (
     <>
-      {isAuthenticated ? (
+      {isAuth ? (
         <IonApp>
           <IonReactRouter>
             <IonTabs>
@@ -156,7 +189,7 @@ const App = () => {
                     </div>
                   ) : userData ? (
                     // Check if user is onboarded
-                    userData.onboard ? (
+                    !userData.onboard ? (
                       <Home
                         dataStore={dataStore}
                         userData={userData}
@@ -170,8 +203,7 @@ const App = () => {
                       />
                     )
                   ) : (
-                    // Handle case where userData is null or undefined
-                    <div> {/* Some fallback UI or another loader */} </div>
+                    <></>
                   )}
                 </Route>
                 <Route
@@ -223,11 +255,11 @@ const App = () => {
               <IonTabBar
                 slot="bottom"
                 color={isCameraActive ? '' : 'light '}
-                className={isCameraActive || !userData?.onboard ? 'hidden' : 'pt-2 pb-4 '}
+                className={isCameraActive ? 'hidden' : 'pt-2 pb-4 '}
               >
                 <IonTabButton
                   tab="home"
-                  className={`${isCameraActive || !userData?.onboard ? 'invisible' : 'visible'} scale-[0.8]`}
+                  className={`${isCameraActive ? 'invisible' : 'visible'} scale-[0.8]`}
                   href="/"
                 >
                   <IonIcon
@@ -237,7 +269,7 @@ const App = () => {
                 </IonTabButton>
                 <IonTabButton
                   tab="analytics"
-                  className={`${isCameraActive || !userData?.onboard ? 'invisible' : 'visible'} scale-[0.8]`}
+                  className={`${isCameraActive ? 'invisible' : 'visible'} scale-[0.8]`}
                   href="/analytics"
                 >
                   <IonIcon
@@ -252,7 +284,7 @@ const App = () => {
                 ></IonTabButton>
                 <IonTabButton
                   tab="logs"
-                  className={`${isCameraActive || !userData?.onboard ? 'invisible' : 'visible'} scale-[0.8]`}
+                  className={`${isCameraActive ? 'invisible' : 'visible'} scale-[0.8]`}
                   href="/logs"
                 >
                   <IonIcon
@@ -262,7 +294,7 @@ const App = () => {
                 </IonTabButton>
                 <IonTabButton
                   tab="profile"
-                  className={`${isCameraActive || !userData?.onboard ? 'invisible' : 'visible'} scale-[0.8]`}
+                  className={`${isCameraActive ? 'invisible' : 'visible'} scale-[0.8]`}
                   href="/profile"
                 >
                   <IonIcon
@@ -273,7 +305,7 @@ const App = () => {
               </IonTabBar>
             </IonTabs>
           </IonReactRouter>
-          {!isCameraActive && userData?.onboard ? (
+          {!isCameraActive ? (
             <div
               className="absolute bottom-[12px] w-[70px] text-3xl h-[70px] flex items-center justify-center bg-[#58F168] onTop rounded-full left-[50%] mb-5 transform -translate-x-1/2"
               onClick={(e) => handleCameraClick(e)}
@@ -304,13 +336,17 @@ const App = () => {
               },
               {
                 text: 'Upgrade!',
-                handler: () => handleUpgradeClick('upgrade'), // Use the custom handler here
+                handler: () => handleUpgradeClick('upgrade'),
               },
             ]}
           ></IonAlert>
         </IonApp>
       ) : (
-        <Login />
+        <Login
+          dataStore={dataStore}
+          createUser={createUser}
+          isAuth={isAuth}
+        />
       )}
     </>
   );
