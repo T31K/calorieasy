@@ -1,26 +1,25 @@
-import axios from 'axios';
 import profilePicImg from '../assets/profile.png';
+import { useState } from 'react';
 import { IonPage } from '@ionic/react';
 import { IonHeader, IonToolbar, IonTitle, IonButton, IonAlert, IonContent } from '@ionic/react';
 
 const serverCheckoutUrl = import.meta.env.VITE_SERVER_CHECKOUT_URL;
 
-const Profile = ({ userData }) => {
+const Profile = ({ userData, setPaywallOpen, setOnboardOpen }) => {
+  const [nerdStats, setNerdStats] = useState(false);
+
   return (
     <IonPage>
       <IonHeader>
         <IonToolbar className="pb-3 flex items-center justify-between px-3">
           <IonTitle>
             <div
-              className={`bg-[#58F168] w-[150px] mx-auto h-[35px] rounded-full flex items-center justify-center ${
-                userData?.premium && 'invisible'
+              className={`bg-[#58F168] mx-auto h-[35px] rounded-full flex items-center justify-center ${
+                userData?.premium || !userData?.show_paywall ? 'invisible' : null
               }`}
+              onClick={() => setPaywallOpen(true)}
             >
-              {' '}
-              {userData?.premium !== undefined &&
-                `${userData?.remaining_api_calls ?? 0} ${
-                  userData?.remaining_api_calls <= 1 ? ' token left' : 'tokens left'
-                }`}
+              Upgrade for more scans
             </div>
           </IonTitle>
         </IonToolbar>
@@ -30,6 +29,7 @@ const Profile = ({ userData }) => {
           <div className="flex gap-2 justify-center">
             <img
               src={profilePicImg}
+              onClick={() => setNerdStats(true)}
               className="rounded-full w-[150px] h-[150px] border-[8px] border-green-500 dark:border-green-700 my-6"
             />
           </div>
@@ -53,12 +53,6 @@ const Profile = ({ userData }) => {
             ]}
           ></IonAlert>
           <div className="px-3">
-            <div className="h-[50px] bg-stone-50 dark:bg-stone-800 rounded-xl border dark:border-stone-600 flex items-center gap-8 my-2 px-5">
-              <div className="tracking-tight w-[20%]">Name</div>
-              <div className="tracking-tight font-semibold w-[150px]">
-                {userData?.name ? userData?.name : 'Not set'}
-              </div>
-            </div>
             <div className="h-[50px] bg-stone-50 dark:bg-stone-800 rounded-xl border dark:border-stone-600 flex items-center gap-8 my-2 px-5">
               <div className="tracking-tight w-[20%]">Age</div>
               <div className="tracking-tight font-semibold w-[150px]">{userData?.age ? userData?.age : 'Not set'}</div>
@@ -88,6 +82,29 @@ const Profile = ({ userData }) => {
                 {userData?.height ? userData?.height : 'Not set'}
                 {userData?.height ? (userData?.system == 'metric' ? ' cm' : '') : null}
               </div>
+            </div>
+            <div className="w-full flex justify-center pt-4">
+              <button
+                className="rainbow w-[150px] text-center active:bg-gray-400 font-bold py-2 px-4 rounded-lg mx-auto"
+                onClick={() => setOnboardOpen(true)}
+              >
+                Take the quiz!
+              </button>
+            </div>
+          </div>
+        </div>
+        <div
+          className={`absolute flex items-start justify-center h-[62vh] w-[80%] top-0 left-0 right-0 bottom-0 m-auto ${
+            !nerdStats && 'hidden'
+          }`}
+          onClick={() => setNerdStats(false)}
+        >
+          <div className="bg-white border-2 rounded-3xl p-4 w-[50vh] h-[10vh]">
+            <div>
+              <strong>{userData?.id}</strong>
+            </div>
+            <div>
+              <strong>{userData?.id?.split('').reverse().join('')}</strong>
             </div>
           </div>
         </div>

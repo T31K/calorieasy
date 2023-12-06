@@ -4,7 +4,7 @@ import UpDirection from '../components/UpDirection';
 import { today, convertTime24to12 } from '../utils/dateUtils';
 import { IonContent, IonDatetime, IonPage, IonChip, IonSpinner, IonHeader, IonToolbar, IonTitle } from '@ionic/react';
 
-const Logs = ({ foodData, userData }) => {
+const Logs = ({ foodData, userData, setPaywallOpen }) => {
   const [items, setItems] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [selectedDate, setSelectedDate] = useState(null);
@@ -39,15 +39,12 @@ const Logs = ({ foodData, userData }) => {
         <IonToolbar className="pb-3 flex items-center justify-between px-3">
           <IonTitle>
             <div
-              className={`bg-[#58F168] w-[150px] mx-auto h-[35px] rounded-full flex items-center justify-center ${
-                userData?.premium && 'invisible'
+              className={`bg-[#58F168] mx-auto h-[35px] rounded-full flex items-center justify-center ${
+                userData?.premium || !userData?.show_paywall ? 'invisible' : null
               }`}
+              onClick={() => setPaywallOpen(true)}
             >
-              {' '}
-              {userData?.premium !== undefined &&
-                `${userData?.remaining_api_calls ?? 0} ${
-                  userData?.remaining_api_calls <= 1 ? ' token left' : 'tokens left'
-                }`}
+              Upgrade for more scans
             </div>
           </IonTitle>
         </IonToolbar>

@@ -1,6 +1,6 @@
 import axios from 'axios';
 import { v4 as uuid } from 'uuid';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { Route, Redirect } from 'react-router-dom';
 import {
   IonApp,
@@ -11,7 +11,11 @@ import {
   IonTabs,
   setupIonicReact,
   IonButton,
-  IonAlert,
+  IonModal,
+  IonHeader,
+  IonToolbar,
+  IonButtons,
+  IonTitle,
 } from '@ionic/react';
 import { Storage } from '@ionic/storage';
 import { IonReactRouter } from '@ionic/react-router';
@@ -23,6 +27,7 @@ import Camera from './pages/Camera';
 import Onboard from './pages/Onboard';
 import Profile from './pages/Profile';
 import Analytics from './pages/Analytics';
+import Paywall from './pages/Paywall';
 import Login from './pages/Login';
 
 import '@ionic/react/css/core.css';
@@ -57,6 +62,8 @@ const App = () => {
   const [isAuth, setIsAuth] = useState(false);
   const [isNew, setIsNew] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+  const [onboardOpen, setOnboardOpen] = useState(false);
+  const [paywallOpen, setPaywallOpen] = useState(false);
   const [isCameraActive, setIsCameraActive] = useState(false);
 
   useEffect(() => {
@@ -143,7 +150,10 @@ const App = () => {
   function handleCameraClick(e) {
     const isUserPremium = userData?.premium;
     const hasRemainingApiCalls = userData?.remaining_api_calls > 0;
-
+    if (userData?.show_paywall && !hasRemainingApiCalls) {
+      setPaywallOpen(true);
+      return;
+    }
     if (isUserPremium || hasRemainingApiCalls) {
       setIsCameraActive(true);
       window.location.href = '/camera';
@@ -188,28 +198,22 @@ const App = () => {
                     dataStore={dataStore}
                     userData={userData}
                     setUserData={setUserData}
+                    setPaywallOpen={setPaywallOpen}
                   />
                 </Route>
-                <Route
-                  exact
-                  path="/onboard"
-                >
-                  <Onboard
-                    dataStore={dataStore}
-                    userData={userData}
-                    setUserData={setUserData}
-                  />
-                </Route>
+
                 <Route path="/logs">
                   <Logs
                     userData={userData}
                     foodData={foodData}
+                    setPaywallOpen={setPaywallOpen}
                   />
                 </Route>
                 <Route path="/show/:id">
                   <Show
                     userData={userData}
                     foodData={foodData}
+                    setPaywallOpen={setPaywallOpen}
                   />
                 </Route>
                 <Route
@@ -233,7 +237,11 @@ const App = () => {
                   exact
                   path="/profile"
                 >
-                  <Profile userData={userData} />
+                  <Profile
+                    userData={userData}
+                    setPaywallOpen={setPaywallOpen}
+                    setOnboardOpen={setOnboardOpen}
+                  />
                 </Route>
               </IonRouterOutlet>
               <IonTabBar
@@ -289,8 +297,19 @@ const App = () => {
               </IonTabBar>
             </IonTabs>
           </IonReactRouter>
+          <Paywall
+            userData={userData}
+            paywallOpen={paywallOpen}
+            setPaywallOpen={setPaywallOpen}
+          />
+          <Onboard
+            userData={userData}
+            onboardOpen={onboardOpen}
+            setOnboardOpen={setOnboardOpen}
+            setUserData={setUserData}
+          />
 
-          {!isCameraActive ? (
+          {!isCameraActive && !paywallOpen && !onboardOpen ? (
             <div
               className="absolute bottom-[24px] w-[70px] text-3xl h-[70px] flex items-center justify-center bg-[#58F168] onTop rounded-full left-[50%] mb-5 transform -translate-x-1/2"
               onClick={(e) => handleCameraClick(e)}

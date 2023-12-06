@@ -3,7 +3,7 @@ import { useEffect, useState } from 'react';
 import { useHistory } from 'react-router-dom';
 import { useLocation, useParams } from 'react-router';
 import { chevronBackOutline, trashOutline } from 'ionicons/icons';
-import { IonContent, IonIcon, IonHeader, IonTitle, IonToolbar, IonPage } from '@ionic/react';
+import { IonContent, IonIcon, IonHeader, IonTitle, IonToolbar, IonPage, IonAlert, IonButton } from '@ionic/react';
 
 const serverDeleteUrl = import.meta.env.VITE_SERVER_DELETE_URL;
 
@@ -40,6 +40,11 @@ const Logs = ({ foodData }) => {
   }
 
   async function handleDelete() {
+    const alertElement = document.getElementById('present-alert');
+    if (alertElement) alertElement.click();
+  }
+
+  async function deleteEntry() {
     try {
       if (!id) return;
       const res = await axios.post(`${serverDeleteUrl}`, { id });
@@ -94,6 +99,29 @@ const Logs = ({ foodData }) => {
           ))}
         </div>
       </IonContent>
+      <IonButton
+        id="present-alert"
+        className="absolute invisible"
+      >
+        Click Me
+      </IonButton>
+      <IonAlert
+        header="Delete entry?"
+        trigger="present-alert"
+        buttons={[
+          {
+            text: 'Cancel',
+            role: 'cancel',
+          },
+          {
+            text: 'Delete',
+            role: 'confirm',
+            handler: () => {
+              deleteEntry();
+            },
+          },
+        ]}
+      ></IonAlert>
     </IonPage>
   );
 };

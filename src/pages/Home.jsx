@@ -2,7 +2,7 @@ import { IonPage, IonContent, IonToolbar, IonTitle, IonIcon, IonHeader } from '@
 import { CircularProgressbarWithChildren, buildStyles } from 'react-circular-progressbar';
 import 'react-circular-progressbar/dist/styles.css';
 
-const Home = ({ userData }) => {
+const Home = ({ userData, setPaywallOpen }) => {
   const countPathColor = () => {
     if (!userData?.total_calories) return '58F168';
 
@@ -25,15 +25,12 @@ const Home = ({ userData }) => {
         <IonToolbar className="pb-3 flex items-center justify-between px-3">
           <IonTitle>
             <div
-              className={`bg-[#58F168] w-[150px] mx-auto h-[35px] rounded-full flex items-center justify-center ${
-                userData?.premium && 'invisible'
+              className={`bg-[#58F168] mx-auto h-[35px] rounded-full flex items-center justify-center ${
+                userData?.premium || !userData?.show_paywall ? 'invisible' : null
               }`}
+              onClick={() => setPaywallOpen(true)}
             >
-              {' '}
-              {userData?.premium !== undefined &&
-                `${userData?.remaining_api_calls ?? 0} ${
-                  userData?.remaining_api_calls <= 1 ? ' token left' : 'tokens left'
-                }`}
+              Upgrade for more scans
             </div>
           </IonTitle>
         </IonToolbar>
@@ -76,6 +73,8 @@ const Home = ({ userData }) => {
                 <div
                   style={{
                     width: `${(userData?.current_protein / userData?.total_protein) * 200}px`,
+                    maxWidth: '200px',
+
                     backgroundColor: '#7C8EF1',
                     height: '6px',
                     borderRadius: '3px',
@@ -96,6 +95,8 @@ const Home = ({ userData }) => {
                 <div
                   style={{
                     width: `${(userData?.current_carbs / userData?.total_carbs) * 200}px`,
+                    maxWidth: '200px',
+
                     backgroundColor: '#F1F17C',
                     height: '6px',
                     borderRadius: '3px',
@@ -116,6 +117,7 @@ const Home = ({ userData }) => {
                 <div
                   style={{
                     width: `${(userData?.current_fat / userData?.total_fat) * 200}px`,
+                    maxWidth: '200px',
                     backgroundColor: '#F17C7C',
                     height: '6px',
                     borderRadius: '3px',
