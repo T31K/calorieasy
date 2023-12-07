@@ -55,7 +55,7 @@ const Home = ({ userData, setPaywallOpen }) => {
               <div className="text-xl font-semibold">
                 {userData?.total_calories ? `Goal ${userData?.total_calories}` : null}
               </div>
-              {userData.current_calories ? (
+              {userData ? (
                 <>
                   <div className="text-6xl font-bold my-2">{userData?.current_calories}</div>
                   <div className="text-2xl mt-[-5px] font-medium  text-gray-700 dark:text-stone-400">calories</div>

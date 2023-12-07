@@ -36,7 +36,7 @@ function Paywall({ paywallOpen, setPaywallOpen, userData }) {
       <IonModal isOpen={paywallOpen}>
         <IonHeader>
           <IonToolbar>
-            <IonTitle className="text-red-600 font-semibold">Out of scans!</IonTitle>
+            <IonTitle className="text-stone-900 dark:text-white font-semibold">Get unlimited scans!</IonTitle>
             <IonButtons slot="end">
               <IonIcon
                 aria-hidden="true"
