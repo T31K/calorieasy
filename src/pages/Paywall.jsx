@@ -76,30 +76,30 @@ function Paywall({ paywallOpen, setPaywallOpen, userData }) {
           </div>
           <div className="flex items-center px-3 gap-3 mt-12 ">
             <div
-              className={`w-[50%] h-[130px] p-3 rounded-xl  relative border  bg-green-50 ${
-                selectedPayment == 0 && 'border border-green-600'
+              className={`w-[50%] h-[130px] p-3 rounded-xl  relative border-[6px]  bg-green-50 ${
+                selectedPayment == 0 && 'border-[6px] border-green-400'
               }`}
               onClick={() => setSelectedPayment(0)}
             >
               <div class="absolute top-[-20px] whitespace-nowrap font-semibold left-1/2 transform -translate-x-1/2 bg-green-500 px-3 py-1 rounded-full">
-                50% savings
+                Save 36%
               </div>
-              <div class="text-xl font-semibold tracking-tight text-center">Yearly</div>
-              <div class="text-3xl mt-3 font-bold tracking-tight text-center">$59.99/yr</div>
-              <div className="text-xl mt-3 font-semibold tracking-tight text-center text-stone-600">
+              <div class="text-xl font-semibold tracking-tight text-center text-stone-900">Yearly</div>
+              <div class="text-3xl mt-3 font-bold tracking-tight text-center text-stone-900">$45.99/yr</div>
+              <div className="text-lg mt-3 font-semibold tracking-tight text-center text-stone-600">
                 Unlimited Scans
               </div>
             </div>
             <div
-              className={`w-[50%] h-[130px] p-3 rounded-xl  relative  border bg-gray-50 ${
-                selectedPayment == 1 && 'border border-green-800'
+              className={`w-[50%] h-[130px] p-3 rounded-xl  relative  border-[6px] bg-gray-50 ${
+                selectedPayment == 1 && 'border-[6px] border-green-400'
               }`}
               onClick={() => setSelectedPayment(1)}
             >
               {' '}
-              <div className="text-xl font-semibold tracking-tight text-center">Monthly</div>
-              <div className="text-3xl mt-3 font-bold tracking-tight text-center text-stone-800">$9.99/mo</div>
-              <div className="text-xl mt-3 font-semibold tracking-tight text-center text-stone-600">
+              <div className="text-xl font-semibold tracking-tight text-center text-stone-700">Monthly</div>
+              <div className="text-3xl mt-3 font-bold tracking-tight text-center text-stone-700">$5.99/mo</div>
+              <div className="text-lg mt-3 font-semibold tracking-tight text-center text-stone-600">
                 Unlimited Scans
               </div>
             </div>

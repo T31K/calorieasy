@@ -1,5 +1,6 @@
+import axios from 'axios';
+import './onboard.css';
 import { useState } from 'react';
-import { Swiper, SwiperSlide } from 'swiper/react';
 import {
   IonIcon,
   IonInput,
@@ -12,32 +13,29 @@ import {
   IonSelectOption,
   IonButton,
   IonModal,
-  IonHeader,
-  IonToolbar,
-  IonButtons,
-  IonTitle,
   IonContent,
 } from '@ionic/react';
 
 import { CircularProgressbarWithChildren, buildStyles } from 'react-circular-progressbar';
 import 'react-circular-progressbar/dist/styles.css';
 
-// Import Swiper styles
 import 'swiper/css';
 import 'swiper/css/pagination';
 import 'swiper/css/effect-fade';
 import 'swiper/css/navigation';
-import './onboard.css';
+import { Swiper, SwiperSlide } from 'swiper/react';
 import { EffectFade, Navigation } from 'swiper/modules';
-import { heightList } from '../utils/heightList';
+
+import Loading from '../components/Loading';
 import Icon from '../assets/icon.png';
+import { heightList } from '../utils/heightList';
 import { calculateTdee } from '../utils/tdeeCalc';
 import { addCircleOutline, removeCircleOutline, closeCircleOutline } from 'ionicons/icons';
-import axios from 'axios';
 
 const serverUpdateUrl = 'https://api.getharmonize.app/calorieasy/update_user';
 
 export default function Onboard({ userData, setUserData, onboardOpen, setOnboardOpen }) {
+  const [isOnboarding, setIsOnboarding] = useState(false);
   const [activeSlide, setActiveSlide] = useState(0);
   const [totalCalories, setTotalCalories] = useState(null);
   const [totalMacros, setTotalMacros] = useState({ protein: 0, fat: 0, carbs: 0 });
@@ -74,9 +72,14 @@ export default function Onboard({ userData, setUserData, onboardOpen, setOnboard
   }
 
   async function updateUser(userObj) {
+    setIsOnboarding(true);
     try {
       const res = await axios.post(`${serverUpdateUrl}`, userObj);
-      if (res.status === 200) window.location.href = '/';
+      if (res.status === 200) {
+        setIsOnboarding(false);
+
+        window.location.href = '/';
+      }
     } catch (error) {
       console.error('Error updating user:', error);
     }
@@ -114,13 +117,15 @@ export default function Onboard({ userData, setUserData, onboardOpen, setOnboard
             onSlideChange={(e) => setActiveSlide(e?.activeIndex)}
           >
             <SwiperSlide className="flex flex-col items-center justify-center">
-              <h1 className="text-4xl font-bold tracking-tight mt-[150px] mb-8 text-stone-900">Hi there!</h1>
+              <h1 className="text-4xl font-bold tracking-tight mt-[150px] mb-8 text-stone-900 dark:text-white">
+                Hi there!
+              </h1>
               <img
                 src={Icon}
                 alt=""
                 className="w-[220px]"
               />
-              <div className="text-xl text-center font-medium w-[320px] mt-12 tracking-tight mb-16 text-stone-900">
+              <div className="text-xl text-center font-medium w-[320px] mt-12 tracking-tight mb-16 text-stone-900 dark:text-white">
                 This quick 2 mins quiz <br />
                 will help you set up your <br />
                 nutritional target based <br />
@@ -128,12 +133,12 @@ export default function Onboard({ userData, setUserData, onboardOpen, setOnboard
               </div>
             </SwiperSlide>
             <SwiperSlide className="flex flex-col items-center justify-center">
-              <div className="font-semibold text-xl mb-2 text-gray-800">How old are you?</div>
+              <div className="font-semibold text-xl mb-2 text-gray-800 dark:text-white">How old are you?</div>
               <div className="flex items-center !text-gray-800">
                 <IonInput
                   type="number"
-                  className="w-[50px]"
-                  placeholder="25"
+                  className="w-[50px] dark:text-white"
+                  placeholder="__"
                   onIonChange={(e) =>
                     setUserData({
                       ...userData,
@@ -141,14 +146,15 @@ export default function Onboard({ userData, setUserData, onboardOpen, setOnboard
                     })
                   }
                 ></IonInput>
-                years old
+                <span className="dark:text-white">years old</span>
               </div>
             </SwiperSlide>
             <SwiperSlide className="flex flex-col items-center justify-center">
-              <div className="font-semibold text-xl mb-5  text-gray-800">What is your weight?</div>
+              <div className="font-semibold text-xl mb-5  text-gray-800 dark:text-white">What is your weight?</div>
 
-              <div className="w-[70%] !text-gray-800">
+              <div className="w-[70%] !text-gray-800 !dark:text-white">
                 <IonSegment
+                  className="dark:text-white bg-stone-300"
                   onIonChange={(e) =>
                     setUserData({
                       ...userData,
@@ -168,8 +174,8 @@ export default function Onboard({ userData, setUserData, onboardOpen, setOnboard
               <div className="flex items-center !text-gray-800">
                 <IonInput
                   type="number"
-                  className="w-[50px]"
-                  placeholder="00"
+                  className="w-[50px] dark:text-white"
+                  placeholder="___"
                   onIonChange={(e) =>
                     setUserData({
                       ...userData,
@@ -177,13 +183,14 @@ export default function Onboard({ userData, setUserData, onboardOpen, setOnboard
                     })
                   }
                 ></IonInput>
-                {userData?.system == 'metric' ? 'kg' : 'lbs'}
+                <span className="dark:text-white">{userData?.system == 'metric' ? 'kg' : 'lbs'}</span>
               </div>
             </SwiperSlide>
             <SwiperSlide className="flex flex-col items-center justify-center">
-              <div className="font-semibold text-xl mb-2 text-gray-800">What is your height?</div>
+              <div className="font-semibold text-xl mb-2 text-gray-800 dark:text-white">What is your height?</div>
               <div className="w-[70%] !text-gray-800">
                 <IonSegment
+                  className="dark:text-white bg-stone-300"
                   onIonChange={(e) =>
                     setUserData({
                       ...userData,
@@ -201,11 +208,12 @@ export default function Onboard({ userData, setUserData, onboardOpen, setOnboard
                   </IonSegmentButton>
                 </IonSegment>
               </div>
+
               {userData?.system == 'metric' ? (
                 <div className="flex items-center !text-gray-800">
                   <IonInput
                     type="number"
-                    className="w-[50px] !text-gray-900"
+                    className="w-[50px] text-gray-900 dark:text-white"
                     placeholder="182"
                     onIonChange={(e) =>
                       setUserData({
@@ -214,13 +222,13 @@ export default function Onboard({ userData, setUserData, onboardOpen, setOnboard
                       })
                     }
                   ></IonInput>
-                  cm
+                  <span className="dark:text-white">cm</span>
                 </div>
               ) : (
                 <div>
                   <IonSelect
                     placeholder={userData?.system == 'metric' ? '150' : `4ft 5in`}
-                    className="!text-black"
+                    className="text-black dark:text-white "
                     onIonChange={(e) =>
                       setUserData({
                         ...userData,
@@ -230,6 +238,7 @@ export default function Onboard({ userData, setUserData, onboardOpen, setOnboard
                   >
                     {heightList?.map((height, index) => (
                       <IonSelectOption
+                        className="!text-black !dark:text-white"
                         key={index}
                         value={height}
                       >
@@ -242,7 +251,7 @@ export default function Onboard({ userData, setUserData, onboardOpen, setOnboard
             </SwiperSlide>
 
             <SwiperSlide className="flex flex-col items-center justify-center">
-              <div className="font-semibold text-xl mb-2 text-gray-800">What is your gender?</div>
+              <div className="font-semibold text-xl mb-2 text-gray-800 dark:text-white">What is your gender?</div>
               <div className="w-[70%] w-full flex items-center justify-center mt-4 mr-5 !text-gray-800">
                 <IonRadioGroup
                   value={userData?.gender}
@@ -256,14 +265,14 @@ export default function Onboard({ userData, setUserData, onboardOpen, setOnboard
                   <IonRadio
                     value="male"
                     labelPlacement="end"
-                    className="bg-white px-5 w-[140px] py-1 rounded-lg my-1"
+                    className="bg-stone-300 dark:bg-white px-5 w-[140px] py-1 rounded-lg my-1"
                   >
                     Male
                   </IonRadio>
                   <br />
                   <IonRadio
                     value="female"
-                    className="bg-white px-5 w-[140px] py-1 rounded-lg my-1"
+                    className="bg-stone-300 dark:bg-white px-5 w-[140px] py-1 rounded-lg my-1"
                     labelPlacement="end"
                   >
                     Female
@@ -271,7 +280,7 @@ export default function Onboard({ userData, setUserData, onboardOpen, setOnboard
                   <br />
                   <IonRadio
                     value="other"
-                    className="bg-white px-5 w-[140px] py-1 rounded-lg my-1"
+                    className="bg-stone-300 dark:bg-white px-5 w-[140px] py-1 rounded-lg my-1"
                     labelPlacement="end"
                   >
                     Other
@@ -280,11 +289,13 @@ export default function Onboard({ userData, setUserData, onboardOpen, setOnboard
               </div>
             </SwiperSlide>
             <SwiperSlide className="flex flex-col items-center justify-center">
-              <div className="font-semibold text-xl mb-2 text-gray-800">What is your activity level?</div>
+              <div className="font-semibold text-xl mb-2 text-gray-800 dark:text-white">
+                What is your activity level?
+              </div>
 
               <div>
                 <IonSelect
-                  className="text-gray-800"
+                  className="text-gray-800 dark:text-white"
                   placeholder="Sedentary (office job)"
                   onIonChange={(e) =>
                     setUserData({
@@ -302,11 +313,11 @@ export default function Onboard({ userData, setUserData, onboardOpen, setOnboard
               </div>
             </SwiperSlide>
             <SwiperSlide className="flex flex-col items-center justify-center">
-              <div className="font-semibold text-xl mb-2 text-gray-800">What is your goal?</div>
+              <div className="font-semibold text-xl mb-2 text-gray-800 dark:text-white">What is your goal?</div>
 
               <div>
                 <IonSelect
-                  className="text-gray-800"
+                  className="text-gray-800  dark:text-white"
                   placeholder="Lose weight"
                   onIonChange={(e) =>
                     setUserData({
@@ -322,8 +333,8 @@ export default function Onboard({ userData, setUserData, onboardOpen, setOnboard
               </div>
             </SwiperSlide>
             <SwiperSlide className="flex flex-col items-center justify-center">
-              <div className="font-semibold text-3xl mb-4 text-gray-800">Goal set!</div>
-              <div className="font-semibold text-xl mb-4 text-gray-800">Feel free to customise</div>
+              <div className="font-semibold text-3xl mb-4 text-gray-800  dark:text-white">Goal set!</div>
+              <div className="font-semibold text-xl mb-4 text-gray-800  dark:text-white">Feel free to customise</div>
 
               <CircularProgressbarWithChildren
                 value={100}
@@ -333,32 +344,32 @@ export default function Onboard({ userData, setUserData, onboardOpen, setOnboard
                   strokeWidth: 10,
                 })}
               >
-                <div className="text-6xl font-bold my-2 text-gray-800">{totalCalories}</div>
-                <div className="text-2xl mt-[-5px] font-medium text-gray-800">calories</div>
+                <div className="text-6xl font-bold my-2 text-gray-800  dark:text-white">{totalCalories}</div>
+                <div className="text-2xl mt-[-5px] font-medium text-gray-800  dark:text-white">calories</div>
               </CircularProgressbarWithChildren>
               <div className="flex mt-5 gap-2">
                 <IonIcon
                   aria-hidden="true"
                   icon={removeCircleOutline}
-                  className="text-gray-900 text-2xl"
+                  className="text-gray-900 text-2xl dark:text-white"
                   onClick={() => setTotalCalories((prevCalories) => Math.max(prevCalories - 1, 0))}
                 />
                 <IonIcon
                   aria-hidden="true"
                   icon={addCircleOutline}
-                  className="text-gray-900 text-2xl"
+                  className="text-gray-900 text-2xl dark:text-white"
                   onClick={() => setTotalCalories((prevCalories) => Math.max(prevCalories + 1, 0))}
                 />
               </div>
               <div className="flex items-center gap-12 mt-12">
                 <div className="flex flex-col items-center">
                   <div className="bg-[#F1F17C] px-3 rounded-full py-1 font-semibold">Carbs</div>
-                  <div className="text-3xl font-bold my-2 text-gray-800">{totalMacros?.carbs}</div>
+                  <div className="text-3xl font-bold my-2 text-gray-800 dark:text-white">{totalMacros?.carbs}</div>
                   <div className="flex mt-5 gap-2">
                     <IonIcon
                       aria-hidden="true"
                       icon={removeCircleOutline}
-                      className="text-gray-900 text-2xl"
+                      className="text-gray-900 text-2xl dark:text-white"
                       onClick={() =>
                         setTotalMacros((prevMacros) => ({
                           ...prevMacros,
@@ -369,7 +380,7 @@ export default function Onboard({ userData, setUserData, onboardOpen, setOnboard
                     <IonIcon
                       aria-hidden="true"
                       icon={addCircleOutline}
-                      className="text-gray-900 text-2xl"
+                      className="text-gray-900 text-2xl dark:text-white"
                       onClick={() =>
                         setTotalMacros((prevMacros) => ({
                           ...prevMacros,
@@ -381,12 +392,12 @@ export default function Onboard({ userData, setUserData, onboardOpen, setOnboard
                 </div>
                 <div className="flex flex-col items-center">
                   <div className="bg-[#7C8EF1] px-3 rounded-full py-1 text-white font-semibold">Protein</div>
-                  <div className="text-3xl font-bold my-2 text-gray-800">{totalMacros?.protein}</div>
+                  <div className="text-3xl font-bold my-2 text-gray-800 dark:text-white">{totalMacros?.protein}</div>
                   <div className="flex mt-5 gap-2">
                     <IonIcon
                       aria-hidden="true"
                       icon={removeCircleOutline}
-                      className="text-gray-900 text-2xl"
+                      className="text-gray-900 text-2xl dark:text-white"
                       onClick={() =>
                         setTotalMacros((prevMacros) => ({
                           ...prevMacros,
@@ -397,7 +408,7 @@ export default function Onboard({ userData, setUserData, onboardOpen, setOnboard
                     <IonIcon
                       aria-hidden="true"
                       icon={addCircleOutline}
-                      className="text-gray-900 text-2xl"
+                      className="text-gray-900 text-2xl dark:text-white"
                       onClick={() =>
                         setTotalMacros((prevMacros) => ({
                           ...prevMacros,
@@ -409,12 +420,12 @@ export default function Onboard({ userData, setUserData, onboardOpen, setOnboard
                 </div>
                 <div className="flex flex-col items-center">
                   <div className="bg-[#ed9c9c] px-3 rounded-full py-1 text-white font-semibold">Fat</div>
-                  <div className="text-3xl font-bold my-2 text-gray-800">{totalMacros?.fat}</div>
+                  <div className="text-3xl font-bold my-2 text-gray-800 dark:text-white">{totalMacros?.fat}</div>
                   <div className="flex mt-5 gap-2">
                     <IonIcon
                       aria-hidden="true"
                       icon={removeCircleOutline}
-                      className="text-gray-900 text-2xl"
+                      className="text-gray-900 text-2xl dark:text-white"
                       onClick={() =>
                         setTotalMacros((prevMacros) => ({
                           ...prevMacros,
@@ -425,7 +436,7 @@ export default function Onboard({ userData, setUserData, onboardOpen, setOnboard
                     <IonIcon
                       aria-hidden="true"
                       icon={addCircleOutline}
-                      className="text-gray-900 text-2xl"
+                      className="text-gray-900 text-2xl dark:text-white"
                       onClick={() =>
                         setTotalMacros((prevMacros) => ({
                           ...prevMacros,
@@ -441,14 +452,14 @@ export default function Onboard({ userData, setUserData, onboardOpen, setOnboard
           <div className={`h-[10%] flex px-12 items-center justify-between`}>
             <div
               onClick={handlePrev}
-              className={`bg-gray-300 w-[120px]  text-center active:bg-gray-400 text-gray-800 font-bold py-2 px-4 rounded-lg ${
+              className={`bg-gray-300 w-[120px]  text-center active:bg-gray-400 text-gray-800 font-bold py-2 px-4 rounded-full ${
                 activeSlide == 0 ? 'invisible' : 'visible'
               }`}
             >
               {activeSlide == 7 ? 'Restart' : 'Previous'}
             </div>
             <div
-              className={`bg-gray-300 w-[120px]  text-center active:bg-gray-400  font-bold py-2 px-4 rounded-lg ${
+              className={`bg-gray-300 w-[120px]  text-center active:bg-gray-400  font-bold py-2 px-4 rounded-full ${
                 disableNext() ? 'text-gray-400' : 'text-gray-800'
               }`}
               onClick={handleNextBtnClick}
@@ -457,6 +468,7 @@ export default function Onboard({ userData, setUserData, onboardOpen, setOnboard
             </div>
           </div>
         </IonContent>
+        <Loading showSpinner={isOnboarding} />
       </IonModal>
     </>
   );

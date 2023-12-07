@@ -242,7 +242,7 @@ const App = () => {
                 </IonTabButton>
                 <IonTabButton
                   tab="tab2"
-                  href="/tab2"
+                  href="#"
                 ></IonTabButton>
                 <IonTabButton
                   tab="logs"
