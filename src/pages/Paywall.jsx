@@ -3,15 +3,22 @@ import { useState } from 'react';
 import { IonButton, IonModal, IonHeader, IonToolbar, IonButtons, IonTitle, IonContent, IonIcon } from '@ionic/react';
 import { closeCircleOutline } from 'ionicons/icons';
 import linkImg from '../assets/link.jpeg';
+
+import Loading from '../components/Loading';
+
 function Paywall({ paywallOpen, setPaywallOpen, userData }) {
+  const [isLoading, setIsLoading] = useState(false);
   const [selectedPayment, setSelectedPayment] = useState(0);
 
   const handleCheckout = async () => {
+    setIsLoading(true);
     try {
       const res = await axios.post('https://api.getharmonize.app/calorieasy/checkout', {
         interval: selectedPayment === 0 ? 'yearly' : 'monthly',
         userId: userData.id,
       });
+      setIsLoading(false);
+
       window.location.href = res.data;
     } catch (error) {
       console.error('Error during checkout:', error);
@@ -74,12 +81,14 @@ function Paywall({ paywallOpen, setPaywallOpen, userData }) {
               }`}
               onClick={() => setSelectedPayment(0)}
             >
-              <div class="absolute top-[-20px] whitespace-nowrap left-1/2 transform -translate-x-1/2 bg-green-500 px-3 py-1 rounded-full">
+              <div class="absolute top-[-20px] whitespace-nowrap font-semibold left-1/2 transform -translate-x-1/2 bg-green-500 px-3 py-1 rounded-full">
                 50% savings
               </div>
-              <div class="text-2xl font-semibold text-center">Yearly</div>
-              <div class="text-xl mt-3 font-semibold text-center">$59.99/yr</div>
-              <div class="text-xl mt-3 font-semibold text-center text-stone-600">Billed yearly</div>
+              <div class="text-xl font-semibold tracking-tight text-center">Yearly</div>
+              <div class="text-3xl mt-3 font-bold tracking-tight text-center">$59.99/yr</div>
+              <div className="text-xl mt-3 font-semibold tracking-tight text-center text-stone-600">
+                Unlimited Scans
+              </div>
             </div>
             <div
               className={`w-[50%] h-[130px] p-3 rounded-xl  relative  border bg-gray-50 ${
@@ -88,9 +97,11 @@ function Paywall({ paywallOpen, setPaywallOpen, userData }) {
               onClick={() => setSelectedPayment(1)}
             >
               {' '}
-              <div className="text-2xl font-semibold text-center">Monthly</div>
-              <div className="text-xl mt-3 font-semibold text-center">$9.99/mo</div>
-              <div className="text-xl mt-3 font-semibold text-center text-stone-600">Billed monthly</div>
+              <div className="text-xl font-semibold tracking-tight text-center">Monthly</div>
+              <div className="text-3xl mt-3 font-bold tracking-tight text-center text-stone-800">$9.99/mo</div>
+              <div className="text-xl mt-3 font-semibold tracking-tight text-center text-stone-600">
+                Unlimited Scans
+              </div>
             </div>
           </div>
 
@@ -105,8 +116,9 @@ function Paywall({ paywallOpen, setPaywallOpen, userData }) {
             className="border-2 rounded-xl w-[70%] mx-auto"
             alt=""
           />
-          <div className="tracking-tight text-center mt-2">We only collect payment through Stripe</div>
+          <div className="tracking-tight text-center mt-2">We only collect payments through Stripe</div>
         </IonContent>
+        <Loading showSpinner={isLoading} />
       </IonModal>
     </>
   );

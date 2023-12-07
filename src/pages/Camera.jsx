@@ -1,13 +1,23 @@
 import './camera.css';
 import axios from 'axios';
 import { useEffect, useRef, useState } from 'react';
-import { IonButton, IonModal, IonContent, IonIcon, useIonToast, IonPage, IonAlert } from '@ionic/react';
-
+import { IonButton, IonModal, IonContent, IonIcon, useIonToast, IonPage } from '@ionic/react';
 import { useLocation } from 'react-router';
 import { currentTime } from '../utils/dateUtils';
 import UpDirection from '../components/UpDirection';
 import { CameraPreview } from '@capacitor-community/camera-preview';
-import { cameraOutline, closeCircleOutline, refreshOutline, checkmarkOutline, addCircleOutline } from 'ionicons/icons';
+import {
+  cameraOutline,
+  closeCircleOutline,
+  refreshOutline,
+  checkmarkOutline,
+  addCircleOutline,
+  alertCircleOutline,
+  cloudDoneOutline,
+  fastFoodOutline,
+  barcodeOutline,
+} from 'ionicons/icons';
+import Loading from '../components/Loading';
 
 const cloudinaryUrl = import.meta.env.VITE_CLOUD_URL;
 const cloudinaryPreset = import.meta.env.VITE_CLOUD_PRESET;
@@ -15,21 +25,38 @@ const serverUpload = import.meta.env.VITE_SERVER_UPLOAD;
 const addFoodServerUrl = import.meta.env.VITE_ADD_FOOD;
 
 const Camera = ({ isCameraActive, setIsCameraActive, userData }) => {
-  const modalRef = useRef(null);
   const location = useLocation();
-  const [present] = useIonToast();
+  const [present, dismiss] = useIonToast();
 
   const [imageData, setImageData] = useState('');
   const [foodItem, setFoodItem] = useState(null);
   const [isStreamOn, setIsStreamOn] = useState(false);
   const [isUploading, setIsUploading] = useState(false); // New state to track upload status
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
-  const presentToast = (input) => {
+  const presentToast = (input, variant, duration) => {
     present({
       message: input,
-      duration: 1500,
+      duration: duration ? duration : 1200,
       position: 'top',
+      icon: variant ? variant : null,
     });
+  };
+  const randomAdj = () => {
+    const descriptions = [
+      "It's delicious!",
+      'Quite flavorful!',
+      'Very aromatic!',
+      'Remarkably tender!',
+      'Satisfyingly crunchy!',
+      'Pleasantly salted...',
+      'Uniquely tangy!',
+      'Surprisingly creamy...',
+      'Rich and luscious!',
+      'Simply satisfying!',
+    ];
+    const randomIndex = Math.floor(Math.random() * descriptions.length);
+    return descriptions[randomIndex];
   };
 
   useEffect(() => {
@@ -61,20 +88,22 @@ const Camera = ({ isCameraActive, setIsCameraActive, userData }) => {
     }
 
     try {
+      presentToast('Server has received your food!', cloudDoneOutline);
       const res = await axios.post(`${cloudinaryUrl}`, {
         file: imageData,
         upload_preset: cloudinaryPreset,
       });
-
       if (res.status === 200) {
         const { url } = res.data;
+        presentToast(`Our AI is eating your food. ${randomAdj()}`, fastFoodOutline, 7000);
         const magicRes = await axios.post(`${serverUpload}`, { url });
         if (magicRes.status == 200) {
+          presentToast('Delicious! Here are the calories.', barcodeOutline, 2000);
           const { data } = magicRes;
           setFoodItem(data);
-          openSheetModal();
+          setIsModalOpen(true);
         } else if (magicRes.status === 204) {
-          presentToast("Our AI couldn't read your food. Please readjust your camera");
+          presentToast("Our AI couldn't read your food. Please readjust!", alertCircleOutline);
           setImageData('');
           setIsStreamOn(false);
           turnOnCamera();
@@ -83,23 +112,32 @@ const Camera = ({ isCameraActive, setIsCameraActive, userData }) => {
       setIsUploading(false);
     } catch (error) {
       console.error('Image upload failed:', error);
+      presentToast('Server error & admin has been notified! Try again later.', alertCircleOutline);
+      setImageData('');
+      setIsStreamOn(false);
+      turnOnCamera();
       return { error: error.response ? error.res.data : error.message };
     }
   }
 
   async function addFoodToServer() {
+    presentToast('Adding to your food logs', addCircleOutline);
     setIsUploading(true);
     try {
-      const response = await axios.post(addFoodServerUrl, {
+      const res = await axios.post(addFoodServerUrl, {
         foodData: foodItem,
         adminId: userData.id,
         timestamp: currentTime(),
       });
-
-      if (response.status === 200) {
+      if (res.status === 200) {
         setIsUploading(false);
-        closePage();
-      } else console.error('Failed to add food entry:', response.data);
+        setIsStreamOn(false);
+
+        setImageData('');
+        window.location.href = '/home';
+      } else {
+      }
+      console.error('Failed to add food entry:', res.data);
     } catch (error) {
       console.error('Error adding food entry to the server:', error);
     }
@@ -113,27 +151,14 @@ const Camera = ({ isCameraActive, setIsCameraActive, userData }) => {
     await turnOnCamera();
   }
 
-  async function closePage(e) {
-    e?.stopPropagation();
-    e?.preventDefault();
+  async function closePage() {
     setImageData('');
     await CameraPreview?.stop();
     window.location.href = '/home';
   }
 
-  async function openSheetModal() {
-    const modalElement = document.getElementById('open-modal');
-    if (modalElement) modalElement.click();
-  }
-
   function shouldShowLoadingSpinner() {
     return (!isStreamOn && !imageData) || isUploading;
-  }
-
-  function handleAddBtn(e) {
-    e?.stopPropagation();
-    const alertElement = document.getElementById('present-alert');
-    if (alertElement) alertElement.click();
   }
 
   return (
@@ -200,8 +225,8 @@ const Camera = ({ isCameraActive, setIsCameraActive, userData }) => {
         </>
       )}
       <a
-        className={`top-dog ${!isStreamOn && 'invisible'}`}
-        onClick={async (e) => closePage(e)}
+        className={`top-dog`}
+        onClick={async () => closePage()}
       >
         <IonIcon
           aria-hidden="true"
@@ -212,40 +237,16 @@ const Camera = ({ isCameraActive, setIsCameraActive, userData }) => {
       <div
         className={`absolute top-dog w-[90%] flex items-center justify-center h-[400px] border border-stone-300  rounded-3xl p-6 transform -translate-x-1/2 -translate-y-1/2 top-1/2 left-1/2 `}
       >
-        {shouldShowLoadingSpinner() ? (
-          <div className="top-dog ">
-            <div className="lds-ring">
-              <div></div>
-              <div></div>
-              <div></div>
-              <div></div>
-            </div>
-          </div>
-        ) : (
-          <></>
-        )}
+        <Loading showSpinner={shouldShowLoadingSpinner()} />
       </div>
-      <IonButton
-        id="open-modal"
-        expand="block"
-        className="invisible absolute"
-      >
-        Open Sheet Modal
-      </IonButton>
       <IonModal
-        ref={modalRef}
+        isOpen={isModalOpen}
         trigger="open-modal"
-        initialBreakpoint={0.25}
-        breakpoints={[0.25]}
+        initialBreakpoint={0.38}
+        breakpoints={[0.38]}
       >
         <IonContent className="ion-padding ">
           <div className="border border-stone-300 rounded-2xl flex flex-col items-start justify-between w-full p-4 my-3">
-            <IonIcon
-              aria-hidden="true"
-              icon={addCircleOutline}
-              onClick={(e) => handleAddBtn(e)}
-              className="text-gray-900 text-4xl absolute right-[30px] bg-green-300  rounded-full  text-stone-700 p-1 top-[80px]"
-            />
             <div className="flex justify-between gap-2 w-full">
               <div className="flex items-center gap-2">
                 <div className={`text-4xl bg-blue-100 h-[50px] w-[50px] flex items-center justify-center rounded-xl`}>
@@ -293,37 +294,22 @@ const Camera = ({ isCameraActive, setIsCameraActive, userData }) => {
               </div>
             </div>
           </div>
+          <div className="flex gap-2 h-[50px]">
+            <button
+              className="bg-gray-200 w-full text-center text-stone-800 active:bg-gray-400 font-bold py-2 px-4 rounded-lg mx-auto"
+              onClick={() => setIsModalOpen(false)}
+            >
+              Cancel
+            </button>
+            <button
+              className="bg-[#58F168] w-full text-center active:bg-gray-400 font-bold py-2 px-4 rounded-lg mx-auto"
+              onClick={addFoodToServer}
+            >
+              Add to food logs
+            </button>
+          </div>
         </IonContent>
       </IonModal>
-      <IonButton
-        id="present-alert"
-        className="absolute invisible"
-      >
-        Click Me
-      </IonButton>
-      <IonAlert
-        header="Add food into logs?"
-        trigger="present-alert"
-        buttons={[
-          {
-            text: 'Cancel',
-            role: 'cancel',
-          },
-          {
-            text: 'Add!',
-            role: 'confirm',
-            handler: () => {
-              addFoodToServer();
-            },
-          },
-        ]}
-      ></IonAlert>
-      {/* <div
-        className="absolute h-[100vh] w-full bg-[#222222] opacity-80 flex items-center justify-center"
-        style={{ zIndex: '9999999999' }}
-      >
-        <span className="loader"></span>
-      </div> */}
     </IonPage>
   );
 };

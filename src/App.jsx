@@ -1,25 +1,13 @@
 import axios from 'axios';
 import { v4 as uuid } from 'uuid';
-import { useEffect, useState, useRef } from 'react';
-import { Route, Redirect } from 'react-router-dom';
-import {
-  IonApp,
-  IonIcon,
-  IonRouterOutlet,
-  IonTabBar,
-  IonTabButton,
-  IonTabs,
-  setupIonicReact,
-  IonButton,
-  IonModal,
-  IonHeader,
-  IonToolbar,
-  IonButtons,
-  IonTitle,
-} from '@ionic/react';
 import { Storage } from '@ionic/storage';
+import { useEffect, useState } from 'react';
+import { Route, Redirect } from 'react-router-dom';
 import { IonReactRouter } from '@ionic/react-router';
+
 import { add, homeOutline, listOutline, personOutline, statsChartOutline } from 'ionicons/icons';
+import { IonApp, IonIcon, IonRouterOutlet, IonTabBar, IonTabButton, IonTabs, setupIonicReact } from '@ionic/react';
+
 import Home from './pages/Home';
 import Logs from './pages/Logs';
 import Show from './pages/Show';
@@ -50,7 +38,6 @@ setupIonicReact({
 });
 
 const serverInitUrl = import.meta.env.VITE_SERVER_INIT;
-const serverCheckoutUrl = import.meta.env.VITE_SERVER_CHECKOUT_URL;
 
 const App = () => {
   const [dataStore, setDataStore] = useState(null); // DB
@@ -160,23 +147,6 @@ const App = () => {
       e?.stopPropagation();
     }
   }
-
-  const handleCheckout = async () => {
-    setIsLoading(true);
-    try {
-      const res = await axios.post(`${serverCheckoutUrl}`, {
-        email: user?.email,
-      });
-      if (res.status === 200) {
-        setIsLoading(false);
-        window.location.href = res.data;
-      } else {
-        console.error('Unexpected res status:', res.status);
-      }
-    } catch (error) {
-      console.error('Error creating checkout session:', error);
-    }
-  };
 
   return (
     <>

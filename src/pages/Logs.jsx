@@ -54,7 +54,7 @@ const Logs = ({ foodData, userData, setPaywallOpen }) => {
           <div className="flex justify-center">
             <IonDatetime
               presentation="date"
-              className="rounded-3xl border border-stone-200"
+              className="rounded-3xl border border-stone-200 dark:bg-black"
               onIonChange={(e) => handleIonChange(e)}
             />
           </div>
@@ -63,7 +63,7 @@ const Logs = ({ foodData, userData, setPaywallOpen }) => {
             {items?.map((item, key) => (
               <div
                 key={key}
-                className="border border-stone-200 rounded-2xl flex flex-col items-start justify-between w-full p-4 mb-3"
+                className="border dark:bg-stone-900 border-stone-200 rounded-2xl flex flex-col items-start justify-between w-full p-4 mb-3"
                 onClick={() => navigateToShow(item.id)}
               >
                 <div className="flex justify-between gap-2 w-full">

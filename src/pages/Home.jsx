@@ -1,4 +1,4 @@
-import { IonPage, IonContent, IonToolbar, IonTitle, IonIcon, IonHeader } from '@ionic/react';
+import { IonPage, IonContent, IonToolbar, IonTitle, IonSkeletonText, IonHeader } from '@ionic/react';
 import { CircularProgressbarWithChildren, buildStyles } from 'react-circular-progressbar';
 import 'react-circular-progressbar/dist/styles.css';
 
@@ -55,15 +55,24 @@ const Home = ({ userData, setPaywallOpen }) => {
               <div className="text-xl font-semibold">
                 {userData?.total_calories ? `Goal ${userData?.total_calories}` : null}
               </div>
-              <div className="text-6xl font-bold my-2">{userData?.current_calories}</div>
-              <div className="text-2xl mt-[-5px] font-medium">calories</div>
+              {userData.current_calories ? (
+                <>
+                  <div className="text-6xl font-bold my-2">{userData?.current_calories}</div>
+                  <div className="text-2xl mt-[-5px] font-medium  text-gray-700 dark:text-stone-400">calories</div>
+                </>
+              ) : (
+                <IonSkeletonText
+                  animated={true}
+                  className="w-[180px] !h-[180px] rounded-full"
+                ></IonSkeletonText>
+              )}
             </CircularProgressbarWithChildren>
           </div>
 
           <div className="w-full px-6">
             <div className="flex items-center gap-3 justify-between px-4 my-7">
               <div>
-                <div className="text-left text-md text-gray-700">Protein</div>
+                <div className="text-left text-md text-gray-700 dark:text-stone-400">Protein</div>
                 <div className="text-left text-xl font-bold">
                   {userData?.current_protein}
                   {userData?.total_protein ? `/${userData?.total_protein}g` : 'g'}
@@ -85,7 +94,7 @@ const Home = ({ userData, setPaywallOpen }) => {
             </div>
             <div className="flex items-center gap-3 justify-between px-4 my-7">
               <div>
-                <div className="text-left text-md text-gray-700">Carbs</div>
+                <div className="text-left text-md text-gray-700 dark:text-stone-400">Carbs</div>
                 <div className="text-left text-xl font-bold">
                   {userData?.current_carbs}
                   {userData?.total_carbs ? `/${userData?.total_carbs}g` : 'g'}
@@ -107,7 +116,7 @@ const Home = ({ userData, setPaywallOpen }) => {
             </div>
             <div className="flex items-center gap-3 justify-between px-4 my-7">
               <div>
-                <div className="text-left text-md text-gray-700">Fat</div>
+                <div className="text-left text-md text-gray-700 dark:text-stone-400">Fat</div>
                 <div className="text-left text-xl font-bold">
                   {userData?.current_fat}
                   {userData?.total_fat ? `/${userData?.total_fat}g` : 'g'}
