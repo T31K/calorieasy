@@ -137,14 +137,15 @@ const App = () => {
   function handleCameraClick(e) {
     const isUserPremium = userData?.premium;
     const hasRemainingApiCalls = userData?.remaining_api_calls > 0;
-    if (userData?.show_paywall && !hasRemainingApiCalls) {
-      setPaywallOpen(true);
-      return;
-    }
-    if (isUserPremium || hasRemainingApiCalls) {
-      setIsCameraActive(true);
-      window.location.href = '/camera';
-      e?.stopPropagation();
+
+    if (userData?.show_paywall) {
+      if (isUserPremium || hasRemainingApiCalls) {
+        setIsCameraActive(true);
+        window.location.href = '/camera';
+        e?.stopPropagation();
+      } else {
+        setPaywallOpen(true);
+      }
     }
   }
 

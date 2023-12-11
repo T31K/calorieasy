@@ -1,11 +1,12 @@
 import './camera.css';
 import axios from 'axios';
-import { useEffect, useRef, useState } from 'react';
-import { IonButton, IonModal, IonContent, IonIcon, useIonToast, IonPage } from '@ionic/react';
+
 import { useLocation } from 'react-router';
+import { useEffect, useState } from 'react';
 import { currentTime } from '../utils/dateUtils';
-import UpDirection from '../components/UpDirection';
+
 import { CameraPreview } from '@capacitor-community/camera-preview';
+import { IonModal, IonContent, IonIcon, useIonToast, IonPage } from '@ionic/react';
 import {
   cameraOutline,
   closeCircleOutline,
@@ -17,7 +18,9 @@ import {
   fastFoodOutline,
   barcodeOutline,
 } from 'ionicons/icons';
+
 import Loading from '../components/Loading';
+import UpDirection from '../components/UpDirection';
 
 const cloudinaryUrl = import.meta.env.VITE_CLOUD_URL;
 const cloudinaryPreset = import.meta.env.VITE_CLOUD_PRESET;
@@ -26,18 +29,19 @@ const addFoodServerUrl = import.meta.env.VITE_ADD_FOOD;
 
 const Camera = ({ isCameraActive, setIsCameraActive, userData }) => {
   const location = useLocation();
-  const [present, dismiss] = useIonToast();
+  const [present] = useIonToast();
 
   const [imageData, setImageData] = useState('');
   const [foodItem, setFoodItem] = useState(null);
   const [isStreamOn, setIsStreamOn] = useState(false);
   const [isUploading, setIsUploading] = useState(false); // New state to track upload status
+
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   const presentToast = (input, variant, duration) => {
     present({
       message: input,
-      duration: duration ? duration : 1200,
+      duration: 1500,
       position: 'top',
       icon: variant ? variant : null,
     });
@@ -95,28 +99,28 @@ const Camera = ({ isCameraActive, setIsCameraActive, userData }) => {
       });
       if (res.status === 200) {
         const { url } = res.data;
-        presentToast(`Our AI is eating your food. ${randomAdj()}`, fastFoodOutline, 7000);
+        presentToast(`Our AI is eating your food. ${randomAdj()}`, fastFoodOutline);
         const magicRes = await axios.post(`${serverUpload}`, { url });
         if (magicRes.status == 200) {
-          presentToast('Delicious! Here are the calories.', barcodeOutline, 2000);
+          presentToast('Delicious! Here are the calories.', barcodeOutline);
           const { data } = magicRes;
           setFoodItem(data);
+          setIsUploading(false);
           setIsModalOpen(true);
-        } else if (magicRes.status === 204) {
+        }
+        if (magicRes.status === 204) {
           presentToast("Our AI couldn't read your food. Please readjust!", alertCircleOutline);
           setImageData('');
-          setIsStreamOn(false);
-          turnOnCamera();
+          setIsUploading(false);
+          await turnOnCamera();
         }
       }
-      setIsUploading(false);
     } catch (error) {
-      console.error('Image upload failed:', error);
+      console.log(error);
       presentToast('Server error & admin has been notified! Try again later.', alertCircleOutline);
       setImageData('');
-      setIsStreamOn(false);
-      turnOnCamera();
-      return { error: error.response ? error.res.data : error.message };
+      setIsUploading(false);
+      await turnOnCamera();
     }
   }
 
@@ -130,11 +134,12 @@ const Camera = ({ isCameraActive, setIsCameraActive, userData }) => {
         timestamp: currentTime(),
       });
       if (res.status === 200) {
+        setIsModalOpen(false);
         setIsUploading(false);
-        setIsStreamOn(false);
-
         setImageData('');
-        window.location.href = '/home';
+        setTimeout(() => {
+          window.location.href = '/home';
+        }, 800);
       } else {
       }
       console.error('Failed to add food entry:', res.data);
@@ -153,7 +158,8 @@ const Camera = ({ isCameraActive, setIsCameraActive, userData }) => {
 
   async function closePage() {
     setImageData('');
-    await CameraPreview?.stop();
+    setIsUploading(false);
+    if (isStreamOn) await CameraPreview?.stop();
     window.location.href = '/home';
   }
 
