@@ -192,7 +192,6 @@ const App = () => {
                   path="/camera"
                 >
                   <Camera
-                    dataStore={dataStore}
                     userData={userData}
                     isCameraActive={isCameraActive}
                     setIsCameraActive={setIsCameraActive}

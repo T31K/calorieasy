@@ -16,29 +16,31 @@ import {
   alertCircleOutline,
   cloudDoneOutline,
   fastFoodOutline,
+  pizzaOutline,
   barcodeOutline,
 } from 'ionicons/icons';
 
-import Loading from '../components/Loading';
 import UpDirection from '../components/UpDirection';
+
+import { isFood } from '../utils/objDetect';
 
 const cloudinaryUrl = import.meta.env.VITE_CLOUD_URL;
 const cloudinaryPreset = import.meta.env.VITE_CLOUD_PRESET;
 const serverUpload = import.meta.env.VITE_SERVER_UPLOAD;
 const addFoodServerUrl = import.meta.env.VITE_ADD_FOOD;
 
-const Camera = ({ isCameraActive, setIsCameraActive, userData }) => {
+const Camera = ({ userData, setIsCameraActive }) => {
   const location = useLocation();
   const [present] = useIonToast();
 
-  const [imageData, setImageData] = useState('');
   const [foodItem, setFoodItem] = useState(null);
-  const [isStreamOn, setIsStreamOn] = useState(false);
-  const [isUploading, setIsUploading] = useState(false); // New state to track upload status
+  const [isLoading, setIsLoading] = useState(true);
+  const [imageData, setImageData] = useState('');
 
+  const [cameraStep, setCameraStep] = useState(2);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
-  const presentToast = (input, variant, duration) => {
+  const presentToast = (input, variant) => {
     present({
       message: input,
       duration: 1500,
@@ -46,6 +48,7 @@ const Camera = ({ isCameraActive, setIsCameraActive, userData }) => {
       icon: variant ? variant : null,
     });
   };
+
   const randomAdj = () => {
     const descriptions = [
       "It's delicious!",
@@ -69,10 +72,10 @@ const Camera = ({ isCameraActive, setIsCameraActive, userData }) => {
   }, [location]);
 
   useEffect(() => {
-    if (isCameraActive && userData && Object.keys(userData).length > 0) {
+    if (userData && Object.keys(userData).length > 0) {
       turnOnCamera();
     }
-  }, [isCameraActive, userData]);
+  }, [userData]);
 
   async function turnOnCamera() {
     await CameraPreview?.start({
@@ -80,53 +83,81 @@ const Camera = ({ isCameraActive, setIsCameraActive, userData }) => {
       toBack: true,
       position: 'rear',
     });
-    setIsStreamOn(true);
+    setCameraStep(2);
+    setIsLoading(false);
+  }
+
+  async function captureImage(e) {
+    setIsLoading(true);
+    e?.stopPropagation();
+    e?.preventDefault();
+    const options = {
+      quality: 80,
+      x: 0,
+      y: 0,
+      width: window.screen.width,
+      height: window.screen.height,
+      rotateWhenOrientationChanged: false,
+    };
+    const result = await CameraPreview.captureSample(options);
+    setImageData(`data:image/jpeg;base64,${result.value}`);
+    setCameraStep(3);
+    await CameraPreview.stop();
+
+    const isImgFood = await isFood(result.value);
+    if (isImgFood) {
+      presentToast('Food present in image, proceed!', checkmarkOutline);
+      setCameraStep(4);
+    } else {
+      presentToast('Please upload food only', pizzaOutline);
+      resetCamera();
+    }
+    setIsLoading(false);
+  }
+
+  async function uploadImage() {
+    const uploadRes = await axios.post(`${cloudinaryUrl}`, {
+      file: imageData,
+      upload_preset: cloudinaryPreset,
+    });
+    if (uploadRes.status === 200) {
+      const { url } = uploadRes.data;
+      return url;
+    }
   }
 
   async function sendImgToServer() {
-    if (isUploading) return;
-    setIsUploading(true);
+    setIsLoading(true);
+    presentToast('Server has received your food!', cloudDoneOutline);
 
-    if (!imageData || !userData) {
-      return { error: 'No image data provided' };
+    setCameraStep(5);
+    const uploadedUrl = await uploadImage(); // Wait for the URL from the uploadImage function.
+
+    if (!imageData || !uploadedUrl) {
+      console.log('No image data/url provided');
+      return;
     }
-
     try {
-      presentToast('Server has received your food!', cloudDoneOutline);
-      const res = await axios.post(`${cloudinaryUrl}`, {
-        file: imageData,
-        upload_preset: cloudinaryPreset,
-      });
-      if (res.status === 200) {
-        const { url } = res.data;
-        presentToast(`Our AI is eating your food. ${randomAdj()}`, fastFoodOutline);
-        const magicRes = await axios.post(`${serverUpload}`, { url });
-        if (magicRes.status == 200) {
-          presentToast('Delicious! Here are the calories.', barcodeOutline);
-          const { data } = magicRes;
-          setFoodItem(data);
-          setIsUploading(false);
-          setIsModalOpen(true);
-        }
-        if (magicRes.status === 204) {
-          presentToast("Our AI couldn't read your food. Please readjust!", alertCircleOutline);
-          setImageData('');
-          setIsUploading(false);
-          await turnOnCamera();
-        }
+      presentToast(`Our AI is eating your food. ${randomAdj()}`, fastFoodOutline);
+      const aiRes = await axios.post(`${serverUpload}`, { url: uploadedUrl });
+      if (aiRes.status === 200) {
+        presentToast('Here are the calories!', barcodeOutline);
+        const { data } = aiRes;
+        setFoodItem(data);
+        setIsModalOpen(true);
       }
     } catch (error) {
       console.log(error);
       presentToast('Server error & admin has been notified! Try again later.', alertCircleOutline);
       setImageData('');
-      setIsUploading(false);
+      setCameraStep(4);
       await turnOnCamera();
     }
+    setIsLoading(false);
   }
 
   async function addFoodToServer() {
     presentToast('Adding to your food logs', addCircleOutline);
-    setIsUploading(true);
     try {
       const res = await axios.post(addFoodServerUrl, {
         foodData: foodItem,
@@ -135,69 +166,58 @@ const Camera = ({ isCameraActive, setIsCameraActive, userData }) => {
       });
       if (res.status === 200) {
         setIsModalOpen(false);
-        setIsUploading(false);
         setImageData('');
-        setTimeout(() => {
-          window.location.href = '/home';
-        }, 800);
-      } else {
+        window.location.href = '/home';
       }
-      console.error('Failed to add food entry:', res.data);
     } catch (error) {
       console.error('Error adding food entry to the server:', error);
     }
   }
 
   async function resetCamera(e) {
-    if (isUploading) return;
-    e.stopPropagation();
-    e.preventDefault();
+    e?.stopPropagation();
+    e?.preventDefault();
     setImageData('');
+    setCameraStep(3);
     await turnOnCamera();
   }
 
   async function closePage() {
+    if (isLoading) return;
     setImageData('');
-    setIsUploading(false);
-    if (isStreamOn) await CameraPreview?.stop();
+    setCameraStep(1);
+    await CameraPreview?.stop();
     window.location.href = '/home';
-  }
-
-  function shouldShowLoadingSpinner() {
-    return (!isStreamOn && !imageData) || isUploading;
   }
 
   return (
     <IonPage className="cameraPage">
-      {!imageData && isStreamOn ? (
-        <a
-          onClick={async (e) => {
-            e.stopPropagation();
-            e.preventDefault();
-            const cameraSampleOptions = {
-              quality: 80,
-            };
-
-            const result = await CameraPreview.captureSample(cameraSampleOptions);
-            setImageData(`data:image/jpeg;base64,${result.value}`);
-            setIsStreamOn(false);
-            await CameraPreview.stop();
-          }}
+      {cameraStep == 2 && (
+        <div
+          onClick={async (e) => captureImage(e)}
           className="absolute bottom-[105px] w-[70px] text-3xl h-[70px] flex items-center justify-center bg-[#58F168] active:bg-green-600  onTop rounded-full left-[50%] mb-5 transform -translate-x-1/2"
         >
           <IonIcon
             aria-hidden="true"
+            className="text-black"
             icon={cameraOutline}
           />
-        </a>
-      ) : (
-        <></>
+        </div>
       )}
-      {imageData && (
+      {cameraStep == 3 && (
         <>
           <img
             src={imageData}
-            className="h-screen top-dog"
+            className="h-screen w-screen top-dog"
+            alt=""
+          />
+        </>
+      )}
+      {cameraStep == 4 || cameraStep == 5 ? (
+        <>
+          <img
+            src={imageData}
+            className="h-screen w-screen top-dog"
             alt=""
           />
           <div
@@ -205,8 +225,8 @@ const Camera = ({ isCameraActive, setIsCameraActive, userData }) => {
           >
             <button
               onClick={async (e) => resetCamera(e)}
-              className={`w-[70px] text-3xl h-[70px] flex items-center justify-center  ${
-                isUploading ? 'bg-gray-400' : 'bg-[#F17C7C]'
+              className={`w-[70px] text-3xl font-semibold  h-[70px] flex items-center justify-center  ${
+                cameraStep == 5 ? 'bg-gray-400' : 'bg-[#F17C7C]'
               } rounded-full`}
             >
               <IonIcon
@@ -216,10 +236,10 @@ const Camera = ({ isCameraActive, setIsCameraActive, userData }) => {
             </button>
             <button
               onClick={sendImgToServer}
-              className={`w-[70px] text-3xl h-[70px] flex items-center justify-center ${
-                isUploading ? 'bg-gray-400' : 'bg-[#58F168]'
+              className={`w-[70px] text-3xl  font-semibold h-[70px] flex items-center justify-center ${
+                cameraStep == 5 ? 'bg-gray-400' : 'bg-[#58F168]'
               } rounded-full`}
-              disabled={isUploading}
+              disabled={cameraStep == 5}
             >
               <IonIcon
                 aria-hidden="true"
@@ -229,22 +249,30 @@ const Camera = ({ isCameraActive, setIsCameraActive, userData }) => {
             </button>
           </div>
         </>
+      ) : (
+        <></>
       )}
-      <a
-        className={`top-dog`}
-        onClick={async () => closePage()}
-      >
-        <IonIcon
-          aria-hidden="true"
-          icon={closeCircleOutline}
-          className="absolute top-dog top-[45px] right-5 text-4xl"
-        />
-      </a>
+      {cameraStep >= 2 && (
+        <>
+          <div
+            className={`top-dog`}
+            onClick={async () => closePage()}
+          >
+            <IonIcon
+              aria-hidden="true"
+              icon={closeCircleOutline}
+              className={`absolute top-dog top-[55px] right-[10px] text-4xl ${isLoading && 'opacity-10'}`}
+            />
+          </div>
+        </>
+      )}
+
       <div
-        className={`absolute top-dog w-[90%] flex items-center justify-center h-[400px] border border-stone-300  rounded-3xl p-6 transform -translate-x-1/2 -translate-y-1/2 top-1/2 left-1/2 `}
-      >
-        <Loading showSpinner={shouldShowLoadingSpinner()} />
-      </div>
+        className={`absolute top-dog w-[90%] flex items-center justify-center h-[400px] ${
+          isLoading ? 'loading-border' : 'normal-border'
+        } rounded-3xl p-6 transform -translate-x-1/2 -translate-y-1/2 top-1/2 left-1/2 `}
+      ></div>
+
       <IonModal
         isOpen={isModalOpen}
         trigger="open-modal"

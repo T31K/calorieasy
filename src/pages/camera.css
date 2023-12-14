@@ -111,11 +111,48 @@
   animation: rotation .5s ease-in infinite;
   }
 
-  @keyframes rotation {
+.loading-border {
+  border: 5px solid white;
+  border-radius: 5px;
+  animation: loading-border 1s ease-in-out infinite;
+}
+
+.normal-border {
+  border: 5px solid white;
+  border-radius: 5px;
+}
+
+@keyframes loading-border {
   0% {
-      transform: rotate(0deg);
+    border-color: white;
+    border-width: 5px;
+  }
+  50% {
+    border-color: green;
+    border-width: 5px;
   }
   100% {
-      transform: rotate(360deg);
+    border-color: white;
+    border-width: 5px;
   }
-  } 
+}
+
+
+.error-border {
+  animation: error-border 1s ease-in-out 2s;
+}
+
+@keyframes error-border {
+  0% {
+    border-color: white;
+    border-width: 5px;
+  }
+  50% {
+    border-color: red;
+    border-width: 5px;
+  }
+  100% {
+    border-color: white;
+    border-width: 5px;
+  }
+}
