@@ -138,15 +138,19 @@ const App = () => {
     const isUserPremium = userData?.premium;
     const hasRemainingApiCalls = userData?.remaining_api_calls > 0;
 
-    if (userData?.show_paywall) {
-      if (isUserPremium || hasRemainingApiCalls) {
-        setIsCameraActive(true);
-        window.location.href = '/camera';
-        e?.stopPropagation();
-      } else {
-        setPaywallOpen(true);
-      }
-    }
+    // if (userData?.show_paywall) {
+    //   if (isUserPremium || hasRemainingApiCalls) {
+    //     setIsCameraActive(true);
+    //     window.location.href = '/camera';
+    //     e?.stopPropagation();
+    //   } else {
+    //     setPaywallOpen(true);
+    //   }
+    // }
+
+    setIsCameraActive(true);
+    window.location.href = '/camera';
+    e?.stopPropagation();
   }
 
   return (

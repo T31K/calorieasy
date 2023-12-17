@@ -18,6 +18,12 @@ PODS:
     - Capacitor
   - CapacitorVideoPlayer (5.0.2):
     - Capacitor
+  - PurchasesHybridCommon (8.1.1):
+    - RevenueCat (= 4.31.2)
+  - RevenueCat (4.31.2)
+  - RevenuecatPurchasesCapacitor (7.3.1):
+    - Capacitor
+    - PurchasesHybridCommon (= 8.1.1)
 
 DEPENDENCIES:
   - "Capacitor (from `../../node_modules/@capacitor/ios`)"
@@ -30,6 +36,12 @@ DEPENDENCIES:
   - "CapacitorSplashScreen (from `../../node_modules/@capacitor/splash-screen`)"
   - "CapacitorStatusBar (from `../../node_modules/@capacitor/status-bar`)"
   - CapacitorVideoPlayer (from `../../node_modules/capacitor-video-player`)
+  - "RevenuecatPurchasesCapacitor (from `../../node_modules/@revenuecat/purchases-capacitor`)"
+
+SPEC REPOS:
+  trunk:
+    - PurchasesHybridCommon
+    - RevenueCat
 
 EXTERNAL SOURCES:
   Capacitor:
@@ -52,6 +64,8 @@ EXTERNAL SOURCES:
     :path: "../../node_modules/@capacitor/status-bar"
   CapacitorVideoPlayer:
     :path: "../../node_modules/capacitor-video-player"
+  RevenuecatPurchasesCapacitor:
+    :path: "../../node_modules/@revenuecat/purchases-capacitor"
 
 SPEC CHECKSUMS:
   Capacitor: 9da0a2415e3b6098511f8b5ffdb578d91ee79f8f
@@ -64,7 +78,10 @@ SPEC CHECKSUMS:
   CapacitorSplashScreen: 5fa2ab5e46cf5cc530cf16a51c80c7a986579ccd
   CapacitorStatusBar: 565c0a1ebd79bb40d797606a8992b4a105885309
   CapacitorVideoPlayer: 756f72d4cfe773a42807f54b176155213622fbfa
+  PurchasesHybridCommon: 2439f6e671fb4d60878a652e4377fa7e588368e6
+  RevenueCat: 63f6f4ae6916095561b90b2e1de86a492af67493
+  RevenuecatPurchasesCapacitor: 7feb58e0d11a4a6a58a54cbf815c85667a712e96
 
-PODFILE CHECKSUM: 522e74d04eb71f576cdf323c5f256bdcf90a3c94
+PODFILE CHECKSUM: 77ff13c74e81aef718d1a238d881ba7b76fd6360
 
 COCOAPODS: 1.13.0
