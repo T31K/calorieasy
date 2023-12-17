@@ -60,11 +60,11 @@ function Paywall({ paywallOpen, setPaywallOpen, userData }) {
               className="w-[40px] "
               alt=""
             />
-            <div className="tracking-tight leading-[18px] ml-2">
+            <div className="tracking-tight leading-[18px] ml-2 font-medium">
               Effortlessly log meals with our AI powered tech, just snap a pic.
             </div>
           </div>
-          <div className="flex items-center mt-8">
+          <div className="flex items-center mt-8 font-medium">
             <img
               src="https://emojiguide.com/wp-content/uploads/platform/apple/43206.png"
               className="w-[40px] "
@@ -76,29 +76,18 @@ function Paywall({ paywallOpen, setPaywallOpen, userData }) {
           </div>
           <div className="flex items-center px-3 gap-3 mt-12 ">
             <div
-              className={`w-[50%] h-[130px] p-3 rounded-xl  relative border-[6px]  bg-green-50 ${
+              className={`w-full h-[180px] p-3 rounded-3xl flex justify-center items-center flex-col relative border-[6px]  bg-green-50 ${
                 selectedPayment == 0 && 'border-[6px] border-green-400'
               }`}
               onClick={() => setSelectedPayment(0)}
             >
-              <div class="absolute top-[-20px] whitespace-nowrap font-semibold left-1/2 transform -translate-x-1/2 bg-green-500 px-3 py-1 rounded-full">
+              <div class="hidden absolute top-[-20px] whitespace-nowrap font-semibold left-1/2 transform -translate-x-1/2 bg-green-500 px-3 py-1 rounded-full">
                 Save 36%
               </div>
-              <div class="text-xl font-semibold tracking-tight text-center text-stone-900">Yearly</div>
-              <div class="text-3xl mt-3 font-bold tracking-tight text-center text-stone-900">$45.99/yr</div>
-              <div className="text-lg mt-3 font-semibold tracking-tight text-center text-stone-600">
-                Unlimited Scans
+              <div class="text-2xl font-semibold tracking-tight text-center tracking-tight text-stone-900">
+                One Time Payment
               </div>
-            </div>
-            <div
-              className={`w-[50%] h-[130px] p-3 rounded-xl  relative  border-[6px] bg-gray-50 ${
-                selectedPayment == 1 && 'border-[6px] border-green-400'
-              }`}
-              onClick={() => setSelectedPayment(1)}
-            >
-              {' '}
-              <div className="text-xl font-semibold tracking-tight text-center text-stone-700">Monthly</div>
-              <div className="text-3xl mt-3 font-bold tracking-tight text-center text-stone-700">$5.99/mo</div>
+              <div class="text-5xl mt-3 font-bold tracking-tight text-center text-stone-900">$39.99</div>
               <div className="text-lg mt-3 font-semibold tracking-tight text-center text-stone-600">
                 Unlimited Scans
               </div>
@@ -111,12 +100,6 @@ function Paywall({ paywallOpen, setPaywallOpen, userData }) {
           >
             Start Tracking!
           </div>
-          <img
-            src={linkImg}
-            className="border-2 rounded-xl w-[70%] mx-auto"
-            alt=""
-          />
-          <div className="tracking-tight text-center mt-2">We only collect payments through Stripe</div>
         </IonContent>
         <Loading showSpinner={isLoading} />
       </IonModal>
