@@ -18,8 +18,7 @@ function Paywall({ paywallOpen, setPaywallOpen, userData }) {
         userId: userData.id,
       });
       setIsLoading(false);
-
-      window.location.href = res.data;
+      if (res.status == 200) window.location.href = res.data;
     } catch (error) {
       console.error('Error during checkout:', error);
     }

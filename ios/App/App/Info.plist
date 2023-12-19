@@ -46,12 +46,12 @@
     <key>UIViewControllerBasedStatusBarAppearance</key>
     <true/>
     <key>NSCameraUsageDescription</key>
-    <string>This app requires access to the camera</string>
+    <string>Our app uses your camera to take pictures of your meals for calorie analysis and tracking, helping you maintain your dietary goals.</string>
     <key>NSMicrophoneUsageDescription</key>
-    <string>This app requires access to the microphone</string>
+    <string>The microphone access is required by a library used in our app. The microphone is not actively used and no audio data is recorded or stored.</string>
     <key>NSPhotoLibraryAddUsageDescription</key>
-    <string>This app requires access to add photos to the photo library</string>
+    <string>Our app needs permission to add photos to your library for saving your meal photos and dietary information.</string>
     <key>NSPhotoLibraryUsageDescription</key>
-    <string>This app requires access to the photo library</string>
+    <string>Access to your photo library is used for selecting existing photos of your meals for calorie analysis and dietary tracking.</string>
 </dict>
 </plist>
