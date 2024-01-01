@@ -4,6 +4,7 @@ import { Storage } from '@ionic/storage';
 import { useEffect, useState } from 'react';
 import { Route, Redirect } from 'react-router-dom';
 import { IonReactRouter } from '@ionic/react-router';
+import { Purchases, LOG_LEVEL } from '@revenuecat/purchases-capacitor';
 
 import { add, homeOutline, listOutline, personOutline, statsChartOutline } from 'ionicons/icons';
 import { IonApp, IonIcon, IonRouterOutlet, IonTabBar, IonTabButton, IonTabs, setupIonicReact } from '@ionic/react';
@@ -38,6 +39,7 @@ setupIonicReact({
 });
 
 const serverInitUrl = import.meta.env.VITE_SERVER_INIT;
+const revenueCatKey = import.meta.env.REVENUE_CAT_KEY;
 
 const App = () => {
   const [dataStore, setDataStore] = useState(null); // DB
@@ -52,6 +54,7 @@ const App = () => {
   const [onboardOpen, setOnboardOpen] = useState(false);
   const [paywallOpen, setPaywallOpen] = useState(false);
   const [isCameraActive, setIsCameraActive] = useState(false);
+  const [products, setProducts] = useState([]);
 
   useEffect(() => {
     async function initStore() {
@@ -71,6 +74,14 @@ const App = () => {
       if (adminData.length == 36) fetchUserData(adminData);
     }
   }, [adminData]);
+
+  useEffect(() => {
+    async function initPurchases() {
+      await Purchases.configure({ apiKey: revenueCatKey });
+      await Purchases.setLogLevel({ level: LOG_LEVEL.DEBUG });
+    }
+    initPurchases();
+  }, []);
 
   const createUser = async () => {
     const generatedUUID = uuid();

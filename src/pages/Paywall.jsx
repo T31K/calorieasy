@@ -1,15 +1,40 @@
 import axios from 'axios';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { IonButton, IonModal, IonHeader, IonToolbar, IonButtons, IonTitle, IonContent, IonIcon } from '@ionic/react';
 import { closeCircleOutline } from 'ionicons/icons';
-import linkImg from '../assets/link.jpeg';
-
+import { Purchases } from '@revenuecat/purchases-capacitor';
 import Loading from '../components/Loading';
 
 function Paywall({ paywallOpen, setPaywallOpen, userData }) {
   const [isLoading, setIsLoading] = useState(false);
   const [selectedPayment, setSelectedPayment] = useState(0);
 
+  const handlePurchase = async () => {
+    setIsLoading(true);
+    try {
+      const offerings = await Purchases.getOfferings();
+      if (offerings.current !== null && offerings.current.availablePackages.length !== 0) {
+        const { availablePackages } = offerings.current;
+        const purchaseResult = await Purchases.purchasePackage({ aPackage: availablePackages[0] });
+        setIsLoading(false);
+
+        if (purchaseResult.customerInfo.entitlements.active['your_entitlement_identifier']) {
+          // The purchase was successful, and the user has access to the entitlement
+          alert('Purchase successful!');
+        }
+      }
+    } catch (error) {
+      alert(error);
+      // Handle the error accordingly
+      if (error.code === 'PURCHASE_CANCELLED') {
+        alert('Purchase cancelled');
+      } else {
+        alert('Error making purchase');
+      }
+    } finally {
+      setIsLoading(false);
+    }
+  };
   const handleCheckout = async () => {
     setIsLoading(true);
     try {
@@ -95,7 +120,7 @@ function Paywall({ paywallOpen, setPaywallOpen, userData }) {
 
           <div
             className="btn btn-primary mx-3 px-3 py-5 mt-8 mb-12 bg-green-500 rounded-full text-center text-2xl font-semibold text-white tracking-tight leading-none"
-            onClick={handleCheckout}
+            onClick={handlePurchase}
           >
             Start Tracking!
           </div>
