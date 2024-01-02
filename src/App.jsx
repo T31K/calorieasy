@@ -18,6 +18,7 @@ import Profile from './pages/Profile';
 import Analytics from './pages/Analytics';
 import Paywall from './pages/Paywall';
 import Login from './pages/Login';
+import ConfettiContainer from './components/ConfettiContainer';
 
 import '@ionic/react/css/core.css';
 import '@ionic/react/css/normalize.css';
@@ -39,7 +40,7 @@ setupIonicReact({
 });
 
 const serverInitUrl = import.meta.env.VITE_SERVER_INIT;
-const revenueCatKey = import.meta.env.REVENUE_CAT_KEY;
+const revenueCatKey = import.meta.env.VITE_REVENUE_CAT_KEY;
 
 const App = () => {
   const [dataStore, setDataStore] = useState(null); // DB
@@ -54,7 +55,8 @@ const App = () => {
   const [onboardOpen, setOnboardOpen] = useState(false);
   const [paywallOpen, setPaywallOpen] = useState(false);
   const [isCameraActive, setIsCameraActive] = useState(false);
-  const [products, setProducts] = useState([]);
+
+  const [showConfetti, setShowConfetti] = useState(false);
 
   useEffect(() => {
     async function initStore() {
@@ -168,6 +170,10 @@ const App = () => {
     <>
       {!isNew ? (
         <IonApp>
+          <ConfettiContainer
+            showConfetti={showConfetti}
+            setShowConfetti={setShowConfetti}
+          />
           <IonReactRouter>
             <IonTabs>
               <IonRouterOutlet>
@@ -284,8 +290,10 @@ const App = () => {
           </IonReactRouter>
           <Paywall
             userData={userData}
+            setUserData={setUserData}
             paywallOpen={paywallOpen}
             setPaywallOpen={setPaywallOpen}
+            setShowConfetti={setShowConfetti}
           />
           <Onboard
             userData={userData}
@@ -293,7 +301,6 @@ const App = () => {
             setOnboardOpen={setOnboardOpen}
             setUserData={setUserData}
           />
-
           {!isCameraActive && !paywallOpen && !onboardOpen ? (
             <div
               className="absolute bottom-[24px] w-[70px] text-3xl h-[70px] flex items-center justify-center bg-[#58F168] onTop rounded-full left-[50%] mb-5 transform -translate-x-1/2"

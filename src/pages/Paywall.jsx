@@ -1,11 +1,16 @@
 import axios from 'axios';
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { IonButton, IonModal, IonHeader, IonToolbar, IonButtons, IonTitle, IonContent, IonIcon } from '@ionic/react';
 import { closeCircleOutline } from 'ionicons/icons';
 import { Purchases } from '@revenuecat/purchases-capacitor';
 import Loading from '../components/Loading';
 
-function Paywall({ paywallOpen, setPaywallOpen, userData }) {
+import MeImg from '../assets/me.png';
+import FoldedHandsImg from '../assets/folded_hands.png';
+
+const activePremiumUrl = import.meta.env.VITE_SERVER_ACTIVATE_PREMIUM;
+
+function Paywall({ paywallOpen, setPaywallOpen, userData, setUserData, setShowConfetti }) {
   const [isLoading, setIsLoading] = useState(false);
   const [selectedPayment, setSelectedPayment] = useState(0);
 
@@ -18,34 +23,36 @@ function Paywall({ paywallOpen, setPaywallOpen, userData }) {
         const purchaseResult = await Purchases.purchasePackage({ aPackage: availablePackages[0] });
         setIsLoading(false);
 
-        if (purchaseResult.customerInfo.entitlements.active['your_entitlement_identifier']) {
-          // The purchase was successful, and the user has access to the entitlement
-          alert('Purchase successful!');
+        if (purchaseResult.customerInfo.nonSubscriptionTransactions.length > 0) {
+          const transaction = purchaseResult.customerInfo.nonSubscriptionTransactions[0];
+          if (transaction.productIdentifier === 'ce_3999') handleSuccess();
         }
       }
     } catch (error) {
-      alert(error);
-      // Handle the error accordingly
-      if (error.code === 'PURCHASE_CANCELLED') {
-        alert('Purchase cancelled');
-      } else {
-        alert('Error making purchase');
-      }
+      console.log(error);
+      // if (error) alert(error);
+      // if (error.code === '1') {
+      //   alert('Purchase cancelled');
+      // }
     } finally {
       setIsLoading(false);
     }
   };
-  const handleCheckout = async () => {
-    setIsLoading(true);
+
+  const handleSuccess = async () => {
+    setUserData({
+      ...userData,
+      premium: true,
+    });
+
     try {
-      const res = await axios.post('https://api.getharmonize.app/calorieasy/checkout', {
-        interval: selectedPayment === 0 ? 'yearly' : 'monthly',
-        userId: userData.id,
-      });
-      setIsLoading(false);
-      if (res.status == 200) window.location.href = res.data;
+      const res = await axios.post(activePremiumUrl, { userId: userData.id });
+      if (res.status == 200) {
+        setShowConfetti(true);
+        setPaywallOpen(false);
+      }
     } catch (error) {
-      console.error('Error during checkout:', error);
+      console.error('Error activating premium:', error);
     }
   };
   return (
@@ -98,32 +105,66 @@ function Paywall({ paywallOpen, setPaywallOpen, userData }) {
               Customize your requirements with our self test to match your goals.{' '}
             </div>
           </div>
-          <div className="flex items-center px-3 gap-3 mt-12 ">
-            <div
-              className={`w-full h-[180px] p-3 rounded-3xl flex justify-center items-center flex-col relative border-[6px]  bg-green-50 ${
-                selectedPayment == 0 && 'border-[6px] border-green-400'
-              }`}
-              onClick={() => setSelectedPayment(0)}
-            >
-              <div class="hidden absolute top-[-20px] whitespace-nowrap font-semibold left-1/2 transform -translate-x-1/2 bg-green-500 px-3 py-1 rounded-full">
-                Save 36%
-              </div>
-              <div class="text-2xl font-semibold tracking-tight text-center tracking-tight text-stone-900">
-                One Time Payment
-              </div>
-              <div class="text-5xl mt-3 font-bold tracking-tight text-center text-stone-900">$39.99</div>
-              <div className="text-lg mt-3 font-semibold tracking-tight text-center text-stone-600">
-                Unlimited Scans
+          {userData.premium ? (
+            <div className="flex items-center px-3 gap-3 mt-12 ">
+              <div
+                className={`w-full h-[180px] p-3 rounded-3xl flex justify-center items-center flex-col relative border-[6px]  bg-green-50 ${'border-[6px] border-green-400'}`}
+              >
+                <img
+                  src={MeImg}
+                  className="w-[100px] absolute left-0 bottom-[0px] rounded-bl-[15px]"
+                />
+
+                <div className="flex">
+                  <img
+                    src={FoldedHandsImg}
+                    className="w-[35px] ml-[20px]"
+                  />
+                  <img
+                    src={FoldedHandsImg}
+                    className="w-[35px]"
+                  />
+                </div>
+                <div className="flex flex-col !pl-[25px] items-center ">
+                  <div class="text-2xl font-semibold tracking-tight ml-5 text-center tracking-tight text-stone-900">
+                    Thank you for purchasing!
+                  </div>
+                  <div class="text-2xl font-semibold tracking-tight ml-5 text-center tracking-tight text-stone-900">
+                    It means a lot!
+                  </div>
+                </div>
               </div>
             </div>
-          </div>
+          ) : (
+            <div className="flex items-center px-3 gap-3 mt-12 ">
+              <div
+                className={`w-full h-[180px] p-3 rounded-3xl flex justify-center items-center flex-col relative border-[6px]  bg-green-50 ${
+                  selectedPayment == 0 && 'border-[6px] border-green-400'
+                }`}
+                onClick={() => setSelectedPayment(0)}
+              >
+                <div class="text-2xl font-semibold tracking-tight text-center tracking-tight text-stone-900">
+                  One Time Payment
+                </div>
+                <div className="flex items-center gap-2">
+                  <div class="text-5xl mt-3 font-bold tracking-tight text-center text-stone-900 ml-12">$39.99</div>
+                  <div className="text-sm font-medium bg-green-500 px-2 rounded-full text-white py-.5 mt-3">USD</div>
+                </div>
 
-          <div
-            className="btn btn-primary mx-3 px-3 py-5 mt-8 mb-12 bg-green-500 rounded-full text-center text-2xl font-semibold text-white tracking-tight leading-none"
-            onClick={handlePurchase}
-          >
-            Start Tracking!
-          </div>
+                <div className="text-lg mt-3 font-semibold tracking-tight text-center text-stone-600">
+                  Unlimited Scans
+                </div>
+              </div>
+            </div>
+          )}
+          {!userData?.premium && (
+            <div
+              className="btn btn-primary mx-3 px-3 py-5 mt-8 mb-12 bg-green-500 rounded-full text-center text-2xl font-semibold text-white tracking-tight leading-none"
+              onClick={handlePurchase}
+            >
+              Start Tracking!
+            </div>
+          )}
         </IonContent>
         <Loading showSpinner={isLoading} />
       </IonModal>

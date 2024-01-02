@@ -39,12 +39,10 @@ const Logs = ({ foodData, userData, setPaywallOpen }) => {
         <IonToolbar className="pb-3 flex items-center justify-between px-3">
           <IonTitle>
             <div
-              className={`bg-[#58F168] mx-auto h-[35px] rounded-full flex items-center justify-center ${
-                userData?.premium || !userData?.show_paywall ? 'invisible' : null
-              }`}
+              className={`bg-[#58F168] mx-auto h-[35px] rounded-full flex items-center justify-center`}
               onClick={() => setPaywallOpen(true)}
             >
-              Upgrade for more scans
+              {userData?.premium ? 'Premium User' : 'Upgrade for more scans'}
             </div>
           </IonTitle>
         </IonToolbar>
