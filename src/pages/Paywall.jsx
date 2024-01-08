@@ -1,14 +1,18 @@
 import axios from 'axios';
 import { useState } from 'react';
-import { IonButton, IonModal, IonHeader, IonToolbar, IonButtons, IonTitle, IonContent, IonIcon } from '@ionic/react';
+
 import { closeCircleOutline } from 'ionicons/icons';
+import { IonButton, IonModal, IonHeader, IonToolbar, IonButtons, IonTitle, IonContent, IonIcon } from '@ionic/react';
+
 import { Purchases } from '@revenuecat/purchases-capacitor';
-import Loading from '../components/Loading';
 
 import MeImg from '../assets/me.png';
 import FoldedHandsImg from '../assets/folded_hands.png';
 
 const activePremiumUrl = import.meta.env.VITE_SERVER_ACTIVATE_PREMIUM;
+
+import Loading from '../components/Loading';
+import ReviewBlocks from '../components/ReviewBlocks';
 
 function Paywall({ paywallOpen, setPaywallOpen, userData, setUserData, setShowConfetti }) {
   const [isLoading, setIsLoading] = useState(false);
@@ -105,10 +109,11 @@ function Paywall({ paywallOpen, setPaywallOpen, userData, setUserData, setShowCo
               Customize your requirements with our self test to match your goals.{' '}
             </div>
           </div>
+          <ReviewBlocks />
           {userData.premium ? (
-            <div className="flex items-center px-3 gap-3 mt-12 ">
+            <div className="flex items-center px-3 gap-3 mt-6">
               <div
-                className={`w-full h-[180px] p-3 rounded-3xl flex justify-center items-center flex-col relative border-[6px]  bg-green-50 ${'border-[6px] border-green-400'}`}
+                className={`w-full h-[180px] p-3 rounded-2xl flex justify-center items-center flex-col relative border-[6px]  bg-green-50 ${'border-[4px] border-green-400'}`}
               >
                 <img
                   src={MeImg}
@@ -136,12 +141,9 @@ function Paywall({ paywallOpen, setPaywallOpen, userData, setUserData, setShowCo
               </div>
             </div>
           ) : (
-            <div className="flex items-center px-3 gap-3 mt-12 ">
+            <div className="flex items-center px-3 gap-3 mt-6">
               <div
-                className={`w-full h-[180px] p-3 rounded-3xl flex justify-center items-center flex-col relative border-[6px]  bg-green-50 ${
-                  selectedPayment == 0 && 'border-[6px] border-green-400'
-                }`}
-                onClick={() => setSelectedPayment(0)}
+                className={`w-full h-[160px] p-3 rounded-2xl flex justify-center items-center flex-col relative border-[4px]  bg-green-100`}
               >
                 <div class="text-2xl font-semibold tracking-tight text-center tracking-tight text-stone-900">
                   One Time Payment
@@ -158,12 +160,14 @@ function Paywall({ paywallOpen, setPaywallOpen, userData, setUserData, setShowCo
             </div>
           )}
           {!userData?.premium && (
-            <div
-              className="btn btn-primary mx-3 px-3 py-5 mt-8 mb-12 bg-green-500 rounded-full text-center text-2xl font-semibold text-white tracking-tight leading-none"
-              onClick={handlePurchase}
-            >
-              Start Tracking!
-            </div>
+            <>
+              <div
+                className="btn btn-primary mx-3 px-3 py-5 mt-8 mb-12 bg-green-500 rounded-full text-center text-2xl font-semibold text-white tracking-tight leading-none"
+                onClick={handlePurchase}
+              >
+                Start Tracking!
+              </div>
+            </>
           )}
         </IonContent>
         <Loading showSpinner={isLoading} />
